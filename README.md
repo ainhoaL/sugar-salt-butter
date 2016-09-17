@@ -9,5 +9,5 @@ I write about the process and the reasoning behind my choices, as well as any in
 
 
 ## Current stage
-Gathering requirements. 
-UX Stage - Analysis
+Working on Wireframes & figuring out Tech stack. User scenarios done, check them out in the blog.
+UX Stage - Design.

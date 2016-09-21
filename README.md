@@ -11,3 +11,5 @@ I write about the process and the reasoning behind my choices, as well as any in
 ## Current stage
 Working on Wireframes & figuring out Tech stack. User scenarios done, check them out in the blog.
 UX Stage - Design.
+
+Check out my first attempt at [interactive wireframes] (http://iplotz.com/app/viewernew.php?k=4c8bcbee1260e51e0fd509c4e8da4e2f&pr=151910&pg=151910_1&a=140301)

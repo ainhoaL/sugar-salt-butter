@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const RecipeIngredientSchema = new Schema({
     quantity: {
-        type: String, // TODO: are we storing "1 1/2" or 1.5? Keep as a string for now
+        type: Number,
         required: true
     },
     unit: {

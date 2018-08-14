@@ -9,14 +9,14 @@ info:
 host: localhost:3050
 basePath: "/api"
 tags:
-- name: "recipe"
+- name: "recipes"
 schemes:
 - "http"
 paths:
-  /recipe:
+  /recipes:
     post:
       tags:
-      - "recipe"
+      - "recipes"
       summary: "Add a new recipe to the collection"
       description: ""
       operationId: "addRecipe"

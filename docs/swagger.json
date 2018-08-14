@@ -1,0 +1,149 @@
+swagger: "2.0"
+info:
+  description: "API for Sugar Salt Butter"
+  version: "1.0.0"
+  title: "Swagger for Sugar, Salt, Butter"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: localhost:3050
+basePath: "/api"
+tags:
+- name: "recipe"
+schemes:
+- "http"
+paths:
+  /recipe:
+    post:
+      tags:
+      - "recipe"
+      summary: "Add a new recipe to the collection"
+      description: ""
+      operationId: "addRecipe"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Recipe object that needs to be added to the collection"
+        required: true
+        schema:
+          $ref: "#/definitions/Recipe"
+      responses:
+        200:
+          description: "OK - Recipe created"
+          
+################################################################################
+#                                 Definitions                                  #
+################################################################################
+definitions:
+  Recipe:
+    type: "object"
+    required:
+    - "userId"
+    - "title"
+    properties:
+      userId:
+        type: "string"
+      title:
+        type: "string"
+        example: "choc chip cookies"
+      image:
+        type: "string"
+        example: "pathToImage"
+      dateCreated:
+        type: "string"
+        format: "date-time"
+      dateLastEdited:
+        type: "string"
+        format: "date-time"
+      source:
+        type: "string"
+        example: "cookiesblog.com/chocchip"
+      ingredients:
+        type: "array"
+        xml:
+          name: "ingredients"
+          wrapped: true
+        items:
+          $ref: "#/definitions/Ingredient"
+      instructions:
+        type: "string"
+        example: "mix everything and bake for 10 mins."
+      tags:
+        type: "array"
+        example: ["cookies", "quick", "desserts"]
+        xml:
+          name: "tags"
+          wrapped: true
+        items:
+          type: "string"
+      rating:
+        type: "integer"
+        format: "int32"
+        example: 4
+      wantToTry:
+        type: "boolean"
+        example: true
+      servings:
+        type: "integer"
+        format: "int32"
+        example: 20
+      cookingTime:
+        type: "string"
+        example: "10 mins"
+      prepTime:
+        type: "string"
+        example: "30 mins"
+      notes:
+        type: "string"
+        example: "don't forget to have the butter at room temperature"
+      author:
+        type: "string"
+        example: "super chef"
+      storage:
+        type: "string"
+        example: "in a container for up to 1 week"
+      freezes:
+        type: "boolean"
+        example: true
+      equipment:
+        type: "string"
+        example: "bowl, spoon for mixing and baking tray"
+      macros:
+        $ref: "#/definitions/NutritionalInfo"
+    xml:
+      name: "Recipe"
+  Ingredient:
+    type: "object"
+    required:
+    - "quantity"
+    - "unit"
+    - "name"
+    properties:
+      quantity:
+        type: "number"
+        example: 150
+      unit:
+        type: "string"
+        example: "g"
+      name:
+        type: "string"
+        example: "flour"
+  NutritionalInfo:
+    type: "object"
+    properties:
+      calories:
+        type: "integer"
+        example: 200
+      carbs:
+        type: "number"
+        example: 20
+      protein:
+        type: "number"
+        example: 2
+      fat:
+        type: "number"
+        example: 12

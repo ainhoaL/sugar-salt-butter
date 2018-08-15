@@ -36,7 +36,7 @@ describe('Recipes controller', () => {
         it('PUT creates a new recipe', (done) => {
             recipeCreateStub.returns(Promise.resolve(dbRecipe));
             request(app)
-                .put('/api/recipes')
+                .put('/api/v1/recipes')
                 .send(testRecipe)
                 .expect(200)
                 .end((error, response) => {

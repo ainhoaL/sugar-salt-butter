@@ -12,7 +12,7 @@ const Recipe = mongoose.model('recipe');
 
 describe('Recipes controller', () => {
 
-    describe('/api/recipes', () => {
+    describe('/api/v1/recipes', () => {
         let recipeCreateStub;
         beforeEach(() => {
             recipeCreateStub = sinon.stub(Recipe, 'create');

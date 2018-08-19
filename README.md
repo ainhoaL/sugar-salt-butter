@@ -10,4 +10,4 @@ I write about the process and the reasoning behind my choices, as well as any in
 
 ## Current stage
 - Mongoose model for recipes
-- REST API for creating a recipe in the MongoDB database.
+- REST API for creating a recipe in the MongoDB database. Swagger doc in [docs/swagger.yaml](https://github.com/ainhoaL/sugar-salt-butter/blob/master/docs/swagger.yaml)

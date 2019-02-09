@@ -1,4 +1,5 @@
 # sugar-salt-butter
+[![Build Status](https://travis-ci.com/ainhoaL/sugar-salt-butter.svg?branch=master)](https://travis-ci.com/ainhoaL/sugar-salt-butter)
 
 Web application to organize (store and search) recipes.
 

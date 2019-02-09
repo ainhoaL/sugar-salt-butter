@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
 let app = require('../app.js');
 let recipesController = require('../controllers/recipes_controller.js');
 
-describe.only('Routes', () => {
+describe('Routes', () => {
 
     let recipeCreateStub;
 

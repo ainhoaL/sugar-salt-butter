@@ -4,8 +4,7 @@ const Schema = mongoose.Schema;
 
 const RecipeIngredientSchema = new Schema({
     quantity: {
-        type: Number,
-        required: true
+        type: String // TODO: this should be a Number eventually
     },
     unit: {
         type: String

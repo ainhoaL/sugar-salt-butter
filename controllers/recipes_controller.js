@@ -48,7 +48,7 @@ module.exports = {
             { name: 'oz', regex: /ounce[s]?[.]?/ }, 
             { name: 'l', regex: /[Ll][s]?[.]?\s/ }, 
             { name: 'l', regex: /liter[s]?/ }];
-        let formattedIngrediets = [];
+        let formattedIngredients = [];
         let ingredientsArray = ingredientsText.split(/\r?\n/); // Split by lines
         ingredientsArray.forEach((ingredient) => {
             let foundPosition = -1;
@@ -63,7 +63,7 @@ module.exports = {
                 let quantity = splitArray[0].trim(); // TODO: check it is a number
                 let unit = units[unitCount - 1].name;
                 let name = splitArray[1].trim();
-                formattedIngrediets.push({ quantity, unit, name });
+                formattedIngredients.push({ quantity, unit, name });
             } else { // It does not match any of the unit regex
                 // If there is no unit, then this ingredient has the shape <Quantity Name> or just <Name>
                 let firstSeparation = ingredient.indexOf(' ');
@@ -75,9 +75,9 @@ module.exports = {
                     quantity = null;
                     name = ingredient;
                 }
-                formattedIngrediets.push({ quantity, name });
+                formattedIngredients.push({ quantity, name });
             }
         });
-        return formattedIngrediets;
+        return formattedIngredients;
     }
 }

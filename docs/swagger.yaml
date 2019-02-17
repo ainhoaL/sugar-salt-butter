@@ -124,8 +124,8 @@ definitions:
     - "name"
     properties:
       quantity:
-        type: "number"
-        example: 150
+        type: "string"
+        example: "150"
       unit:
         type: "string"
         example: "g"

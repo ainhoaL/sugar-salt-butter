@@ -33,6 +33,9 @@ const RecipeSchema = new Schema({
   dateLastEdited: {
     type: Date
   },
+  url: {
+    type: String
+  },
   source: {
     type: String
   },

@@ -193,7 +193,7 @@ describe('Recipes controller', () => {
           expect(parsedIngredients).to.deep.equal(expectedIngredients)
         })
 
-        it.skip('returns the correct parsed ingredients when it is formatted "Qty T Ingredient"', () => {
+        it('returns the correct parsed ingredients when it is formatted "Qty T Ingredient"', () => {
           let recipe = '10 Ts butter\n1 T salt\n1/2 T pepper\n1 3/4 T flour\n20.5 T sugar'
 
           let parsedIngredients = recipesController.parseIngredients(recipe)
@@ -209,7 +209,7 @@ describe('Recipes controller', () => {
           expect(parsedIngredients).to.deep.equal(expectedIngredients)
         })
 
-        it.skip('returns the correct parsed ingredients when it is formatted "Qty TB Ingredient"', () => {
+        it('returns the correct parsed ingredients when it is formatted "Qty TB Ingredient"', () => {
           let recipe = '10 TBs butter\n1 TB salt\n1/2 TB pepper\n1 3/4 TB flour\n20.5 TBs sugar'
 
           let parsedIngredients = recipesController.parseIngredients(recipe)
@@ -245,7 +245,7 @@ describe('Recipes controller', () => {
           expect(parsedIngredients).to.deep.equal(expectedIngredients)
         })
 
-        it.skip('returns the correct parsed ingredients when it is formatted "Qty t Ingredient"', () => {
+        it('returns the correct parsed ingredients when it is formatted "Qty t Ingredient"', () => {
           let recipe = '10 t butter\n1 t salt\n1/2 t pepper\n1 3/4 t flour\n20.5 t sugar'
 
           let parsedIngredients = recipesController.parseIngredients(recipe)
@@ -253,7 +253,7 @@ describe('Recipes controller', () => {
           expect(parsedIngredients).to.deep.equal(expectedIngredients)
         })
 
-        it.skip('returns the correct parsed ingredients when it is formatted "Qtyt Ingredient"', () => {
+        it('returns the correct parsed ingredients when it is formatted "Qtyt Ingredient"', () => {
           let recipe = '10t butter\n1t salt\n1/2t pepper\n1 3/4t flour\n20.5t sugar'
 
           let parsedIngredients = recipesController.parseIngredients(recipe)

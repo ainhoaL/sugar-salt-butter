@@ -423,4 +423,46 @@ describe('Recipes controller', () => {
       })
     })
   })
+
+  describe('processRecipe', () => {
+    describe('receives a recipe with ingredients and tags', () => {
+      let testRecipe = {
+        userId: 'user1',
+        title: 'beef pie',
+        ingredients: '1 onion\n500g minced beef',
+        tags: 'dinner tasty'
+      }
+
+      let processedRecipe = {
+        userId: 'user1',
+        title: 'beef pie',
+        ingredients: [{ quantity: '1', name: 'onion' }, { quantity: '500', unit: 'g', name: 'minced beef' }],
+        tags: ['dinner', 'tasty']
+      }
+
+      it('returns a processed recipe with tags', () => {
+        let recipe = recipesController.processRecipe(testRecipe)
+        expect(recipe).to.deep.equal(processedRecipe)
+      })
+    })
+
+    describe('receives a recipe with ingredients but no tags', () => {
+      let testRecipe = {
+        userId: 'user1',
+        title: 'beef pie',
+        ingredients: '1 onion\n500g minced beef'
+      }
+
+      let processedRecipe = {
+        userId: 'user1',
+        title: 'beef pie',
+        ingredients: [{ quantity: '1', name: 'onion' }, { quantity: '500', unit: 'g', name: 'minced beef' }]
+      }
+
+      it('returns a processed recipe without tags', () => {
+        let recipe = recipesController.processRecipe(testRecipe)
+        expect(recipe).to.deep.equal(processedRecipe)
+      })
+    })
+  })
 })

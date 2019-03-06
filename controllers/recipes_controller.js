@@ -10,7 +10,7 @@ module.exports = {
   create (req, res) {
     if (req.body && req.body.ingredients) {
       let recipe = req.body
-      module.exports.processRecipe(recipe)
+      recipe = module.exports.processRecipe(recipe)
 
       // TODO: for now assuming that the request is in the same format as the recipe model
       Recipe.create(recipe).then(dbRecipe => res.send(dbRecipe))
@@ -94,5 +94,7 @@ module.exports = {
     if (recipe.tags) {
       recipe.tags = recipe.tags.split(' ')
     }
+
+    return recipe
   }
 }

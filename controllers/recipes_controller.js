@@ -13,7 +13,24 @@ module.exports = {
       recipe = module.exports.processRecipe(recipe)
 
       // TODO: for now assuming that the request is in the same format as the recipe model
-      Recipe.create(recipe).then(dbRecipe => res.send(dbRecipe))
+      return Recipe.create(recipe).then(dbRecipe => res.send(dbRecipe))
+    } else {
+      return res.send({}) // TODO: error?
+    }
+  },
+
+  /**
+   * Find a recipe
+   * @param req {request object}
+   * @param res {response object}
+   */
+  find (req, res) {
+    if (req.query && req.query.url && req.query.userId) { // For now only search by url
+      return Recipe.findOne({ url: req.query.url, userId: req.query.userId }).then(dbRecipe => {
+        return res.send(dbRecipe)
+      })
+    } else {
+      return res.sendStatus(404) // TODO: create error
     }
   },
 

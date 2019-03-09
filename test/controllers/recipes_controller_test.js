@@ -30,8 +30,22 @@ describe('Recipes controller', () => {
       })
 
       describe('receives a recipe without ingredients', () => {
-        it('does not create a recipe in the database', () => {
+        let testRecipe = {
+          userId: 'user1',
+          title: 'test cake'
+        }
 
+        it('does not create a recipe in the database', (done) => {
+          req.body = testRecipe
+
+          res.on('end', () => {
+            expect(recipeCreateStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(200)
+            expect(res._getData()).to.deep.equal({})
+            done()
+          })
+
+          recipesController.create(req, res)
         })
       })
 
@@ -54,15 +68,83 @@ describe('Recipes controller', () => {
 
           recipeCreateStub.returns(Promise.resolve(dbRecipe))
 
-          recipesController.create(req, res)
-          expect(recipeCreateStub.callCount).to.equal(1)
-          expect(recipeCreateStub).to.have.been.calledWith(testRecipe)
-
           res.on('end', () => {
+            expect(recipeCreateStub.callCount).to.equal(1)
+            expect(recipeCreateStub).to.have.been.calledWith(testRecipe)
             expect(res._getStatusCode()).to.equal(200)
             expect(res._getData()).to.deep.equal(dbRecipe)
             done()
           })
+
+          recipesController.create(req, res)
+        })
+      })
+    })
+
+    describe('find', () => {
+      let recipeFindOneStub
+
+      beforeEach(() => {
+        recipeFindOneStub = sinon.stub(Recipe, 'findOne')
+      })
+
+      afterEach(() => {
+        recipeFindOneStub.restore()
+      })
+
+      describe('receives a request to find a recipe by url', () => {
+        let query = { url: 'http://testrecipe.com/blah', userId: 'me' }
+
+        let dbRecipe = {
+          _id: 'testId',
+          userId: 'me',
+          url: 'http://testrecipe.com/blah',
+          title: 'test cake',
+          ingredients: [{ quantity: null, unit: null, name: 'fake ingredient' }]
+        }
+
+        it('finds the recipe and returns it', (done) => {
+          req.query = query
+
+          recipeFindOneStub.returns(Promise.resolve(dbRecipe))
+
+          res.on('end', () => {
+            expect(recipeFindOneStub.callCount).to.equal(1)
+            expect(recipeFindOneStub).to.have.been.calledWith(query)
+            expect(res._getStatusCode()).to.equal(200)
+            expect(res._getData()).to.deep.equal(dbRecipe)
+            done()
+          })
+
+          recipesController.find(req, res)
+        })
+      })
+
+      describe('receives a request to find a recipe but it has no url', () => {
+        it('does not search for the recipe', (done) => {
+          req.query = { userId: 'me' }
+
+          res.on('end', () => {
+            expect(recipeFindOneStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(404)
+            done()
+          })
+          recipesController.find(req, res)
+        })
+      })
+
+      describe('receives a request to find a recipe by url but it has no userId', () => {
+        let query = { url: 'http://testrecipe.com/blah' }
+
+        it('does not search for the recipe and returns an empty object', (done) => {
+          req.query = query
+
+          res.on('end', () => {
+            expect(recipeFindOneStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(404)
+            done()
+          })
+          recipesController.find(req, res)
         })
       })
     })

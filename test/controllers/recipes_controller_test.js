@@ -66,7 +66,7 @@ describe('Recipes controller', () => {
         it('creates a new recipe', (done) => {
           req.body = testRecipe
 
-          recipeCreateStub.returns(Promise.resolve(dbRecipe))
+          recipeCreateStub.resolves(dbRecipe)
 
           res.on('end', () => {
             expect(recipeCreateStub.callCount).to.equal(1)
@@ -106,7 +106,7 @@ describe('Recipes controller', () => {
         it('finds the recipe and returns it', (done) => {
           req.query = query
 
-          recipeFindOneStub.returns(Promise.resolve(dbRecipe))
+          recipeFindOneStub.resolves(dbRecipe)
 
           res.on('end', () => {
             expect(recipeFindOneStub.callCount).to.equal(1)
@@ -118,6 +118,39 @@ describe('Recipes controller', () => {
 
           recipesController.find(req, res)
         })
+
+        it('does not find the recipe and returns 404', (done) => {
+          req.query = query
+
+          recipeFindOneStub.resolves(null)
+
+          res.on('end', () => {
+            expect(recipeFindOneStub.callCount).to.equal(1)
+            expect(recipeFindOneStub).to.have.been.calledWith(query)
+            expect(res._getStatusCode()).to.equal(404)
+            done()
+          })
+
+          recipesController.find(req, res)
+        })
+
+        context('and the search fails', () => {
+          it('returns 500 and the error', (done) => {
+            req.query = query
+
+            recipeFindOneStub.rejects(new Error('Error searching'))
+
+            res.on('end', () => {
+              expect(recipeFindOneStub.callCount).to.equal(1)
+              expect(recipeFindOneStub).to.have.been.calledWith(query)
+              expect(res._getStatusCode()).to.equal(500)
+              expect(res._getData()).to.equal('Error searching')
+              done()
+            })
+
+            recipesController.find(req, res)
+          })
+        })
       })
 
       describe('receives a request to find a recipe but it has no url', () => {
@@ -126,7 +159,7 @@ describe('Recipes controller', () => {
 
           res.on('end', () => {
             expect(recipeFindOneStub.callCount).to.equal(0)
-            expect(res._getStatusCode()).to.equal(404)
+            expect(res._getStatusCode()).to.equal(501)
             done()
           })
           recipesController.find(req, res)
@@ -141,7 +174,7 @@ describe('Recipes controller', () => {
 
           res.on('end', () => {
             expect(recipeFindOneStub.callCount).to.equal(0)
-            expect(res._getStatusCode()).to.equal(404)
+            expect(res._getStatusCode()).to.equal(501)
             done()
           })
           recipesController.find(req, res)

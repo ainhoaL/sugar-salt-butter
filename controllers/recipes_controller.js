@@ -26,11 +26,19 @@ module.exports = {
    */
   find (req, res) {
     if (req.query && req.query.url && req.query.userId) { // For now only search by url
-      return Recipe.findOne({ url: req.query.url, userId: req.query.userId }).then(dbRecipe => {
-        return res.send(dbRecipe)
-      })
+      return Recipe.findOne({ url: req.query.url, userId: req.query.userId })
+        .then(dbRecipe => {
+          if (dbRecipe) {
+            return res.send(dbRecipe)
+          } else {
+            return res.sendStatus(404)
+          }
+        })
+        .catch((error) => {
+          return res.status(500).send(error.message) // TODO: change for custom error message
+        })
     } else {
-      return res.sendStatus(404) // TODO: create error
+      return res.sendStatus(501)
     }
   },
 

@@ -66,6 +66,77 @@ describe('Recipes controller', () => {
         })
       })
     })
+
+    describe('getRecipe', () => {
+      let recipeFindOneStub
+
+      beforeEach(() => {
+        recipeFindOneStub = sinon.stub(Recipe, 'findOne')
+      })
+
+      afterEach(() => {
+        recipeFindOneStub.restore()
+      })
+
+      describe('receives a request with an id', () => {
+        let dbRecipe = {
+          _id: 'testId',
+          userId: 'user1',
+          title: 'test cake',
+          ingredients: [{ quantity: null, unit: null, name: 'fake ingredient' }]
+        }
+
+        describe('and the recipe exists', () => {
+          it('returns the recipe', (done) => {
+            req.params = { id: 'testId' }
+
+            recipeFindOneStub.returns(Promise.resolve(dbRecipe))
+
+            res.on('end', () => {
+              expect(res._getStatusCode()).to.equal(200)
+              expect(res._getData()).to.deep.equal(dbRecipe)
+              done()
+            })
+
+            recipesController.getRecipe(req, res)
+            expect(recipeFindOneStub.callCount).to.equal(1)
+            expect(recipeFindOneStub).to.have.been.calledWith({ id: 'testId' })
+          })
+        })
+
+        describe('but the recipe does not exist', () => {
+          it('returns a 404 error', (done) => {
+            req.params = { id: 'norecipe' }
+
+            recipeFindOneStub.returns(Promise.resolve(null))
+
+            res.on('end', () => {
+              expect(res._getStatusCode()).to.equal(404)
+              done()
+            })
+
+            recipesController.getRecipe(req, res)
+            expect(recipeFindOneStub.callCount).to.equal(1)
+            expect(recipeFindOneStub).to.have.been.calledWith({ id: 'norecipe' })
+          })
+        })
+      })
+
+      describe('receives a request without id', () => {
+        it('returns a 400 error', (done) => {
+          req.params = { }
+
+          res.on('end', () => {
+            expect(res._getStatusCode()).to.equal(400)
+            expect(res._getData()).to.deep.equal('missing recipe id')
+            done()
+          })
+
+          recipesController.getRecipe(req, res)
+          expect(recipeFindOneStub.callCount).to.equal(0)
+        })
+      })
+    })
   })
 
   describe('parseIngredients', () => {

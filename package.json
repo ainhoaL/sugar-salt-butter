@@ -19,6 +19,7 @@
   "homepage": "https://github.com/ainhoaL/sugar-salt-butter#readme",
   "dependencies": {
     "body-parser": "^1.18.2",
+    "cors": "^2.8.5",
     "express": "^4.16.3",
     "mocha": "^5.1.1",
     "mongoose": "^5.4.10",

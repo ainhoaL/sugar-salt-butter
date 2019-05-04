@@ -34,7 +34,43 @@ paths:
       responses:
         200:
           description: "OK - Recipe created"
-          
+  /recipes/search:
+    get:
+      tags:
+      - "recipes"
+      summary: "Search for a recipe"
+      description: ""
+      operationId: "searchRecipe"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "url"
+        in: "path"
+        description: "Recipe url"
+        required: true
+        schema:
+          type: "string"
+      - name: "userId"
+        in: "path"
+        description: "User ID"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        200:
+          description: "Recipe found"
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/Recipe'
+        404:
+          description: "Not Found"
+        500:
+          description: "Internal Server Error"
+        501:
+          description: "Not Implemented"  
 ################################################################################
 #                                 Definitions                                  #
 ################################################################################

@@ -537,6 +537,30 @@ describe('Recipes controller', () => {
         })
       })
     })
+
+    describe('when the recipe has ingredients without unit', () => {
+      let expectedIngredients = [{ quantity: '10', name: 'almonds' }, { quantity: '2', name: 'sprigs of thyme' }]
+
+      it('returns the correct parsed ingredients when it is formatted "Qty Ingredient"', () => {
+        let recipe = '10 almonds\n2 sprigs of thyme'
+
+        let parsedIngredients = recipesController.parseIngredients(recipe)
+        expect(parsedIngredients.length).to.equal(2)
+        expect(parsedIngredients).to.deep.equal(expectedIngredients)
+      })
+    })
+
+    describe('when the recipe has ingredients without unit or quantity', () => {
+      let expectedIngredients = [{ name: 'a handful of almonds' }, { name: 'a few sprigs of thyme' }, { name: 'salt and pepper' }]
+
+      it('returns the correct parsed ingredients when it is formatted "Qty Ingredient"', () => {
+        let recipe = 'a handful of almonds\na few sprigs of thyme\nsalt and pepper'
+
+        let parsedIngredients = recipesController.parseIngredients(recipe)
+        expect(parsedIngredients.length).to.equal(3)
+        expect(parsedIngredients).to.deep.equal(expectedIngredients)
+      })
+    })
   })
 
   describe('processRecipe', () => {

@@ -11,6 +11,7 @@ let recipesController = require('../controllers/recipes_controller.js')
 describe('Routes', () => {
   let recipeCreateStub
   let recipesGetStub
+  let recipeSearchStub
 
   let testRecipe = {
     userId: 'user1',
@@ -29,11 +30,16 @@ describe('Routes', () => {
       return res.send(dbRecipe)
     })
     recipesGetStub = sinon.stub(recipesController, 'getRecipe')
+    recipeSearchStub = sinon.stub(recipesController, 'find')
+    recipeSearchStub.callsFake((req, res) => {
+      return res.send(dbRecipe)
+    })
   })
 
   afterEach(() => {
     recipeCreateStub.restore()
     recipesGetStub.restore()
+    recipeSearchStub.restore()
   })
 
   describe('/api/v1/recipes', () => {
@@ -83,6 +89,18 @@ describe('Routes', () => {
             })
         })
       })
+    })
+  })
+
+  describe('/api/v1/recipes/search', () => {
+    it('GET finds a recipe', (done) => {
+      request(app)
+        .get('/api/v1/recipes/search?url=http://test&userId=me')
+        .expect(200)
+        .end((_, response) => {
+          expect(response.body).to.deep.equal(dbRecipe)
+          done()
+        })
     })
   })
 })

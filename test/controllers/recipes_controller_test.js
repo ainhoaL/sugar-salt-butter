@@ -30,8 +30,22 @@ describe('Recipes controller', () => {
       })
 
       describe('receives a recipe without ingredients', () => {
-        it('does not create a recipe in the database', () => {
+        let testRecipe = {
+          userId: 'user1',
+          title: 'test cake'
+        }
 
+        it('does not create a recipe in the database', (done) => {
+          req.body = testRecipe
+
+          res.on('end', () => {
+            expect(recipeCreateStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(200)
+            expect(res._getData()).to.deep.equal({})
+            done()
+          })
+
+          recipesController.create(req, res)
         })
       })
 
@@ -52,17 +66,118 @@ describe('Recipes controller', () => {
         it('creates a new recipe', (done) => {
           req.body = testRecipe
 
-          recipeCreateStub.returns(Promise.resolve(dbRecipe))
-
-          recipesController.create(req, res)
-          expect(recipeCreateStub.callCount).to.equal(1)
-          expect(recipeCreateStub).to.have.been.calledWith(testRecipe)
+          recipeCreateStub.resolves(dbRecipe)
 
           res.on('end', () => {
+            expect(recipeCreateStub.callCount).to.equal(1)
+            expect(recipeCreateStub).to.have.been.calledWith(testRecipe)
             expect(res._getStatusCode()).to.equal(200)
             expect(res._getData()).to.deep.equal(dbRecipe)
             done()
           })
+
+          recipesController.create(req, res)
+        })
+      })
+    })
+
+    describe('find', () => {
+      let recipeFindOneStub
+
+      beforeEach(() => {
+        recipeFindOneStub = sinon.stub(Recipe, 'findOne')
+      })
+
+      afterEach(() => {
+        recipeFindOneStub.restore()
+      })
+
+      describe('receives a request to find a recipe by url', () => {
+        let query = { url: 'http://testrecipe.com/blah', userId: 'me' }
+
+        let dbRecipe = {
+          _id: 'testId',
+          userId: 'me',
+          url: 'http://testrecipe.com/blah',
+          title: 'test cake',
+          ingredients: [{ quantity: null, unit: null, name: 'fake ingredient' }]
+        }
+
+        it('finds the recipe and returns it', (done) => {
+          req.query = query
+
+          recipeFindOneStub.resolves(dbRecipe)
+
+          res.on('end', () => {
+            expect(recipeFindOneStub.callCount).to.equal(1)
+            expect(recipeFindOneStub).to.have.been.calledWith(query)
+            expect(res._getStatusCode()).to.equal(200)
+            expect(res._getData()).to.deep.equal(dbRecipe)
+            done()
+          })
+
+          recipesController.find(req, res)
+        })
+
+        it('does not find the recipe and returns 404', (done) => {
+          req.query = query
+
+          recipeFindOneStub.resolves(null)
+
+          res.on('end', () => {
+            expect(recipeFindOneStub.callCount).to.equal(1)
+            expect(recipeFindOneStub).to.have.been.calledWith(query)
+            expect(res._getStatusCode()).to.equal(404)
+            done()
+          })
+
+          recipesController.find(req, res)
+        })
+
+        context('and the search fails', () => {
+          it('returns 500 and the error', (done) => {
+            req.query = query
+
+            recipeFindOneStub.rejects(new Error('Error searching'))
+
+            res.on('end', () => {
+              expect(recipeFindOneStub.callCount).to.equal(1)
+              expect(recipeFindOneStub).to.have.been.calledWith(query)
+              expect(res._getStatusCode()).to.equal(500)
+              expect(res._getData()).to.equal('Error searching')
+              done()
+            })
+
+            recipesController.find(req, res)
+          })
+        })
+      })
+
+      describe('receives a request to find a recipe but it has no url', () => {
+        it('does not search for the recipe', (done) => {
+          req.query = { userId: 'me' }
+
+          res.on('end', () => {
+            expect(recipeFindOneStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(501)
+            done()
+          })
+          recipesController.find(req, res)
+        })
+      })
+
+      describe('receives a request to find a recipe by url but it has no userId', () => {
+        let query = { url: 'http://testrecipe.com/blah' }
+
+        it('does not search for the recipe and returns an empty object', (done) => {
+          req.query = query
+
+          res.on('end', () => {
+            expect(recipeFindOneStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(501)
+            done()
+          })
+          recipesController.find(req, res)
         })
       })
     })
@@ -93,14 +208,14 @@ describe('Recipes controller', () => {
             recipeFindOneStub.returns(Promise.resolve(dbRecipe))
 
             res.on('end', () => {
+              expect(recipeFindOneStub.callCount).to.equal(1)
+              expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'testId' })
               expect(res._getStatusCode()).to.equal(200)
               expect(res._getData()).to.deep.equal(dbRecipe)
               done()
             })
 
             recipesController.getRecipe(req, res)
-            expect(recipeFindOneStub.callCount).to.equal(1)
-            expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'testId' })
           })
         })
 
@@ -111,13 +226,31 @@ describe('Recipes controller', () => {
             recipeFindOneStub.returns(Promise.resolve(null))
 
             res.on('end', () => {
+              expect(recipeFindOneStub.callCount).to.equal(1)
+              expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'norecipe' })
               expect(res._getStatusCode()).to.equal(404)
               done()
             })
 
             recipesController.getRecipe(req, res)
-            expect(recipeFindOneStub.callCount).to.equal(1)
-            expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'norecipe' })
+          })
+        })
+
+        context('and the call to db fails', () => {
+          it('returns 500 and the error', (done) => {
+            req.params = { id: 'testId' }
+
+            recipeFindOneStub.rejects(new Error('Error searching'))
+
+            res.on('end', () => {
+              expect(recipeFindOneStub.callCount).to.equal(1)
+              expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'testId' })
+              expect(res._getStatusCode()).to.equal(500)
+              expect(res._getData()).to.equal('Error searching')
+              done()
+            })
+
+            recipesController.getRecipe(req, res)
           })
         })
       })
@@ -127,13 +260,13 @@ describe('Recipes controller', () => {
           req.params = { }
 
           res.on('end', () => {
+            expect(recipeFindOneStub.callCount).to.equal(0)
             expect(res._getStatusCode()).to.equal(400)
             expect(res._getData()).to.deep.equal('missing recipe id')
             done()
           })
 
           recipesController.getRecipe(req, res)
-          expect(recipeFindOneStub.callCount).to.equal(0)
         })
       })
     })
@@ -491,6 +624,30 @@ describe('Recipes controller', () => {
           expect(parsedIngredients.length).to.equal(5)
           expect(parsedIngredients).to.deep.equal(expectedIngredients)
         })
+      })
+    })
+
+    describe('when the recipe has ingredients without unit', () => {
+      let expectedIngredients = [{ quantity: '10', name: 'almonds' }, { quantity: '2', name: 'sprigs of thyme' }]
+
+      it('returns the correct parsed ingredients when it is formatted "Qty Ingredient"', () => {
+        let recipe = '10 almonds\n2 sprigs of thyme'
+
+        let parsedIngredients = recipesController.parseIngredients(recipe)
+        expect(parsedIngredients.length).to.equal(2)
+        expect(parsedIngredients).to.deep.equal(expectedIngredients)
+      })
+    })
+
+    describe('when the recipe has ingredients without unit or quantity', () => {
+      let expectedIngredients = [{ name: 'a handful of almonds' }, { name: 'a few sprigs of thyme' }, { name: 'salt and pepper' }]
+
+      it('returns the correct parsed ingredients when it is formatted "Qty Ingredient"', () => {
+        let recipe = 'a handful of almonds\na few sprigs of thyme\nsalt and pepper'
+
+        let parsedIngredients = recipesController.parseIngredients(recipe)
+        expect(parsedIngredients.length).to.equal(3)
+        expect(parsedIngredients).to.deep.equal(expectedIngredients)
       })
     })
   })

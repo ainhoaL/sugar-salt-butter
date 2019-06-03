@@ -13,7 +13,32 @@ module.exports = {
       recipe = module.exports.processRecipe(recipe)
 
       // TODO: for now assuming that the request is in the same format as the recipe model
-      Recipe.create(recipe).then(dbRecipe => res.send(dbRecipe))
+      return Recipe.create(recipe).then(dbRecipe => res.send(dbRecipe))
+    } else {
+      return res.send({}) // TODO: error?
+    }
+  },
+
+  /**
+   * Find a recipe
+   * @param req {request object}
+   * @param res {response object}
+   */
+  find (req, res) {
+    if (req.query && req.query.url && req.query.userId) { // For now only search by url
+      return Recipe.findOne({ url: req.query.url, userId: req.query.userId })
+        .then(dbRecipe => {
+          if (dbRecipe) {
+            return res.send(dbRecipe)
+          } else {
+            return res.sendStatus(404)
+          }
+        })
+        .catch((error) => {
+          return res.status(500).send(error.message) // TODO: change for custom error message
+        })
+    } else {
+      return res.sendStatus(501)
     }
   },
 
@@ -62,7 +87,7 @@ module.exports = {
       { name: 'kg', regex: /[Kk]g[s]?[.]?\s/ },
       { name: 'kg', regex: /kilogram[s]?/ },
       { name: 'kg', regex: /kilo[s]?/ },
-      { name: 'g', regex: /g[r]?[s]?[.]?\s/ },
+      { name: 'g', regex: /([0-9]|[\xbc\xbd\xbe])+\s?g[r]?[s]?[.]?\s/, findUnitRegex: /g[r]?[s]?[.]?\s/ },
       { name: 'g', regex: /gram[s]?/ },
       { name: 'ml', regex: /m[Ll][s]?[.]?/ },
       { name: 'ml', regex: /milliliter[s]?/ },
@@ -100,7 +125,7 @@ module.exports = {
 
         if (quantity.indexOf('½') > -1 || quantity.indexOf('¼') > -1 || quantity.indexOf('¾') > -1 || !isNaN(parseInt(quantity))) {
           formattedIngredients.push({ quantity, name })
-        } else if (isNaN(parseInt(quantity))) {
+        } else {
           // Quantity is not a number so this is an ingredient without quantity - For example: a handful of peanuts
           name = ingredient
           formattedIngredients.push({ name })

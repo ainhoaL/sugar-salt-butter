@@ -24,13 +24,17 @@ module.exports = {
      */
   getRecipe (req, res) {
     if (req.params.id) {
-      Recipe.findOne({ _id: req.params.id }).then(dbRecipe => {
-        if (dbRecipe) {
-          res.send(dbRecipe)
-        } else {
-          res.sendStatus(404)
-        }
-      })
+      Recipe.findOne({ _id: req.params.id })
+        .then(dbRecipe => {
+          if (dbRecipe) {
+            res.send(dbRecipe)
+          } else {
+            res.sendStatus(404)
+          }
+        })
+        .catch((error) => {
+          return res.status(500).send(error.message) // TODO: change for custom error message
+        })
     } else {
       res.status(400).send('missing recipe id')
     }

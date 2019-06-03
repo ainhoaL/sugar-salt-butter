@@ -100,7 +100,7 @@ describe('Recipes controller', () => {
 
             recipesController.getRecipe(req, res)
             expect(recipeFindOneStub.callCount).to.equal(1)
-            expect(recipeFindOneStub).to.have.been.calledWith({ id: 'testId' })
+            expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'testId' })
           })
         })
 
@@ -117,7 +117,7 @@ describe('Recipes controller', () => {
 
             recipesController.getRecipe(req, res)
             expect(recipeFindOneStub.callCount).to.equal(1)
-            expect(recipeFindOneStub).to.have.been.calledWith({ id: 'norecipe' })
+            expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'norecipe' })
           })
         })
       })

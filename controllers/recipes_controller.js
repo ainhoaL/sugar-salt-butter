@@ -43,10 +43,10 @@ module.exports = {
   },
 
   /**
-     * Get a recipe using the recipe model
-     * @param req {request object}
-     * @param res {response object}
-     */
+   * Get a recipe using the recipe model
+   * @param req {request object}
+   * @param res {response object}
+   */
   getRecipe (req, res) {
     if (req.params.id) {
       Recipe.findOne({ _id: req.params.id })

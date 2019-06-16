@@ -43,6 +43,29 @@ module.exports = {
   },
 
   /**
+   * Get a recipe using the recipe model
+   * @param req {request object}
+   * @param res {response object}
+   */
+  getRecipe (req, res) {
+    if (req.params.id) {
+      Recipe.findOne({ _id: req.params.id })
+        .then(dbRecipe => {
+          if (dbRecipe) {
+            res.send(dbRecipe)
+          } else {
+            res.sendStatus(404)
+          }
+        })
+        .catch((error) => {
+          return res.status(500).send(error.message) // TODO: change for custom error message
+        })
+    } else {
+      res.status(400).send('missing recipe id')
+    }
+  },
+
+  /**
      * Given a multiline string with a list of ingredients it returns a standardized array of ingredients
      * It standardizes the ingredients units so all ingredients are always stored with same units for easier conversion later on
      * @param ingredientsText {string} - a multiline string with 1 ingredient per line

@@ -181,6 +181,95 @@ describe('Recipes controller', () => {
         })
       })
     })
+
+    describe('getRecipe', () => {
+      let recipeFindOneStub
+
+      beforeEach(() => {
+        recipeFindOneStub = sinon.stub(Recipe, 'findOne')
+      })
+
+      afterEach(() => {
+        recipeFindOneStub.restore()
+      })
+
+      describe('receives a request with an id', () => {
+        let dbRecipe = {
+          _id: 'testId',
+          userId: 'user1',
+          title: 'test cake',
+          ingredients: [{ quantity: null, unit: null, name: 'fake ingredient' }]
+        }
+
+        describe('and the recipe exists', () => {
+          it('returns the recipe', (done) => {
+            req.params = { id: 'testId' }
+
+            recipeFindOneStub.returns(Promise.resolve(dbRecipe))
+
+            res.on('end', () => {
+              expect(recipeFindOneStub.callCount).to.equal(1)
+              expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'testId' })
+              expect(res._getStatusCode()).to.equal(200)
+              expect(res._getData()).to.deep.equal(dbRecipe)
+              done()
+            })
+
+            recipesController.getRecipe(req, res)
+          })
+        })
+
+        describe('but the recipe does not exist', () => {
+          it('returns a 404 error', (done) => {
+            req.params = { id: 'norecipe' }
+
+            recipeFindOneStub.returns(Promise.resolve(null))
+
+            res.on('end', () => {
+              expect(recipeFindOneStub.callCount).to.equal(1)
+              expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'norecipe' })
+              expect(res._getStatusCode()).to.equal(404)
+              done()
+            })
+
+            recipesController.getRecipe(req, res)
+          })
+        })
+
+        context('and the call to db fails', () => {
+          it('returns 500 and the error', (done) => {
+            req.params = { id: 'testId' }
+
+            recipeFindOneStub.rejects(new Error('Error searching'))
+
+            res.on('end', () => {
+              expect(recipeFindOneStub.callCount).to.equal(1)
+              expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'testId' })
+              expect(res._getStatusCode()).to.equal(500)
+              expect(res._getData()).to.equal('Error searching')
+              done()
+            })
+
+            recipesController.getRecipe(req, res)
+          })
+        })
+      })
+
+      describe('receives a request without id', () => {
+        it('returns a 400 error', (done) => {
+          req.params = { }
+
+          res.on('end', () => {
+            expect(recipeFindOneStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(400)
+            expect(res._getData()).to.deep.equal('missing recipe id')
+            done()
+          })
+
+          recipesController.getRecipe(req, res)
+        })
+      })
+    })
   })
 
   describe('parseIngredients', () => {

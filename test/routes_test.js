@@ -29,7 +29,7 @@ describe('Routes', () => {
     recipeCreateStub.callsFake((req, res) => {
       return res.send(dbRecipe)
     })
-    recipesGetStub = sinon.stub(recipesController, 'getRecipe')
+    recipesGetStub = sinon.stub(recipesController, 'get')
     recipeSearchStub = sinon.stub(recipesController, 'find')
     recipeSearchStub.callsFake((req, res) => {
       return res.send(dbRecipe)

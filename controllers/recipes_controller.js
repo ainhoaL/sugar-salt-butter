@@ -75,7 +75,7 @@ module.exports = {
       let recipe = req.body
       recipe = module.exports.processRecipe(recipe)
 
-      return Recipe.findOneAndReplace({ _id: req.params.id }, recipe)
+      return Recipe.replaceOne({ _id: req.params.id }, recipe)
         .then(dbRecipe => {
           if (dbRecipe) {
             return res.sendStatus(204)

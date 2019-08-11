@@ -658,14 +658,14 @@ describe('Recipes controller', () => {
         userId: 'user1',
         title: 'beef pie',
         ingredients: '1 onion\n500g minced beef',
-        tags: 'dinner tasty'
+        tags: 'dinner, tasty,good, with space '
       }
 
       let processedRecipe = {
         userId: 'user1',
         title: 'beef pie',
         ingredients: [{ quantity: '1', name: 'onion' }, { quantity: '500', unit: 'g', name: 'minced beef' }],
-        tags: ['dinner', 'tasty']
+        tags: ['dinner', 'tasty', 'good', 'with space']
       }
 
       it('returns a processed recipe with tags', () => {

@@ -140,7 +140,8 @@ module.exports = {
     recipe.ingredients = ingredients
 
     if (recipe.tags) {
-      recipe.tags = recipe.tags.split(' ')
+      let tags = recipe.tags.split(',')
+      recipe.tags = tags.map(s => s.trim())
     }
 
     return recipe

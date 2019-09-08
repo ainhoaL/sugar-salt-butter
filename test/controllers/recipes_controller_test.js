@@ -93,11 +93,11 @@ describe('Recipes controller', () => {
       })
 
       describe('receives a request to find a recipe by url', () => {
-        let query = { url: 'http://testrecipe.com/blah', userId: 'me' }
+        let query = { url: 'http://testrecipe.com/blah', userId: 'testUserId' }
 
         let dbRecipe = {
           _id: 'testId',
-          userId: 'me',
+          userId: 'testUserId',
           url: 'http://testrecipe.com/blah',
           title: 'test cake',
           ingredients: [{ quantity: null, unit: null, name: 'fake ingredient' }]
@@ -105,6 +105,7 @@ describe('Recipes controller', () => {
 
         it('finds the recipe and returns it', (done) => {
           req.query = query
+          req.userId = 'testUserId'
 
           recipeFindOneStub.resolves(dbRecipe)
 
@@ -121,6 +122,7 @@ describe('Recipes controller', () => {
 
         it('does not find the recipe and returns 404', (done) => {
           req.query = query
+          req.userId = 'testUserId'
 
           recipeFindOneStub.resolves(null)
 
@@ -137,6 +139,7 @@ describe('Recipes controller', () => {
         context('and the search fails', () => {
           it('returns 500 and the error', (done) => {
             req.query = query
+            req.userId = 'testUserId'
 
             recipeFindOneStub.rejects(new Error('Error searching'))
 

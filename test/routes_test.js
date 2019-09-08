@@ -5,22 +5,26 @@ const sinon = require('sinon')
 const sinonChai = require('sinon-chai')
 chai.use(sinonChai)
 
-let app = require('../app.js')
+let app
+let authentication = require('../utils/authentication.js')
 let recipesController = require('../controllers/recipes_controller.js')
 
 describe('Routes', () => {
   let recipeCreateStub
   let recipesGetStub
   let recipeSearchStub
+  let verifyStub
+
+  let userId = 'user1'
 
   let testRecipe = {
-    userId: 'user1',
+    userId: userId,
     title: 'test cake'
   }
 
   let dbRecipe = {
     _id: 'testId',
-    userId: 'user1',
+    userId: userId,
     title: 'test cake'
   }
 
@@ -34,12 +38,21 @@ describe('Routes', () => {
     recipeSearchStub.callsFake((req, res) => {
       return res.send(dbRecipe)
     })
+
+    verifyStub = sinon.stub(authentication, 'verify')
+    verifyStub.callsFake((req, res, next) => {
+      req.userId = userId
+      return next()
+    })
+
+    app = require('../app.js')
   })
 
   afterEach(() => {
     recipeCreateStub.restore()
     recipesGetStub.restore()
     recipeSearchStub.restore()
+    verifyStub.restore()
   })
 
   describe('/api/v1/recipes', () => {

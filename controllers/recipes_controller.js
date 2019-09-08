@@ -25,8 +25,8 @@ module.exports = {
    * @param res {response object}
    */
   find (req, res) {
-    if (req.query && req.query.url && req.query.userId) { // For now only search by url
-      return Recipe.findOne({ url: req.query.url, userId: req.query.userId })
+    if (req.query && req.query.url && req.userId) { // For now only search by url
+      return Recipe.findOne({ url: req.query.url, userId: req.userId })
         .then(dbRecipe => {
           if (dbRecipe) {
             return res.send(dbRecipe)

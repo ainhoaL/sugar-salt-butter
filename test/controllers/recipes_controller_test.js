@@ -31,12 +31,13 @@ describe('Recipes controller', () => {
 
       describe('receives a recipe without ingredients', () => {
         let testRecipe = {
-          userId: 'user1',
+          userId: 'testUserId',
           title: 'test cake'
         }
 
         it('does not create a recipe in the database', (done) => {
           req.body = testRecipe
+          req.userId = 'testUserId'
 
           res.on('end', () => {
             expect(recipeCreateStub.callCount).to.equal(0)
@@ -51,20 +52,21 @@ describe('Recipes controller', () => {
 
       describe('receives a recipe with ingredients', () => {
         let testRecipe = {
-          userId: 'user1',
+          userId: 'testUserId',
           title: 'test cake',
           ingredients: 'fake ingredient'
         }
 
         let dbRecipe = {
           _id: 'testId',
-          userId: 'user1',
+          userId: 'testUserId',
           title: 'test cake',
           ingredients: [{ quantity: null, unit: null, name: 'fake ingredient' }]
         }
 
         it('creates a new recipe', (done) => {
           req.body = testRecipe
+          req.userId = 'testUserId'
 
           recipeCreateStub.resolves(dbRecipe)
 
@@ -158,7 +160,8 @@ describe('Recipes controller', () => {
 
       describe('receives a request to find a recipe but it has no url', () => {
         it('does not search for the recipe', (done) => {
-          req.query = { userId: 'me' }
+          req.query = { }
+          req.userId = 'testUserId'
 
           res.on('end', () => {
             expect(recipeFindOneStub.callCount).to.equal(0)

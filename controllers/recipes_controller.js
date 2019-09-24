@@ -8,9 +8,10 @@ module.exports = {
      * @param res {response object}
      */
   create (req, res) {
-    if (req.body && req.body.ingredients) {
+    if (req.body && req.body.ingredients && req.userId) {
       let recipe = req.body
       recipe = module.exports.processRecipe(recipe)
+      recipe.userId = req.userId
 
       // TODO: for now assuming that the request is in the same format as the recipe model
       return Recipe.create(recipe).then(dbRecipe => res.send(dbRecipe))

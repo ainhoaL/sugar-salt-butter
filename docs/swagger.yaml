@@ -42,7 +42,40 @@ paths:
       - "recipes"
       summary: "Returns a recipe by ID"
       description: ""
-      operationId: "getRecipe"
+      operationId: "get"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "Recipe ID"
+        required: true
+        type: string
+      - in: "body"
+        name: "body"
+        description: "Recipe object that needs to be added to the collection"
+        required: true
+        schema:
+          $ref: "#/definitions/Recipe"
+      responses:
+        204:
+          description: "OK - Recipe updated"
+        400:
+          description: "Bad Request - missing recipe ID"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "recipes"
+      summary: "Updates a recipe by ID"
+      description: ""
+      operationId: "put"
       consumes:
       - "application/json"
       produces:
@@ -61,7 +94,7 @@ paths:
               schema:
                 $ref: '#/definitions/Recipe'
         400:
-          description: "Bad Request - missing recipe ID"
+          description: "Bad Request - missing recipe ID or body"
         401:
           description: "Unauthorized"
         404:

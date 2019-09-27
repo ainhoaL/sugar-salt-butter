@@ -188,7 +188,7 @@ describe('Recipes controller', () => {
       })
     })
 
-    describe('getRecipe', () => {
+    describe('get', () => {
       let recipeFindOneStub
 
       beforeEach(() => {
@@ -221,7 +221,7 @@ describe('Recipes controller', () => {
               done()
             })
 
-            recipesController.getRecipe(req, res)
+            recipesController.get(req, res)
           })
         })
 
@@ -238,7 +238,7 @@ describe('Recipes controller', () => {
               done()
             })
 
-            recipesController.getRecipe(req, res)
+            recipesController.get(req, res)
           })
         })
 
@@ -256,7 +256,7 @@ describe('Recipes controller', () => {
               done()
             })
 
-            recipesController.getRecipe(req, res)
+            recipesController.get(req, res)
           })
         })
       })
@@ -272,7 +272,124 @@ describe('Recipes controller', () => {
             done()
           })
 
-          recipesController.getRecipe(req, res)
+          recipesController.get(req, res)
+        })
+      })
+    })
+
+    describe('update', () => {
+      let recipeReplaceOneStub
+
+      let testRecipe
+
+      beforeEach(() => {
+        recipeReplaceOneStub = sinon.stub(Recipe, 'replaceOne')
+
+        testRecipe = {
+          _id: 'testId',
+          userId: 'user1',
+          title: 'test cake',
+          ingredients: '2 cups fake ingredient'
+        }
+      })
+
+      afterEach(() => {
+        recipeReplaceOneStub.restore()
+      })
+
+      describe('receives a request with an id and body', () => {
+        let dbRecipe = {
+          _id: 'testId',
+          userId: 'user1',
+          title: 'test cake before editing',
+          ingredients: [{ quantity: 1, unit: 'cup', name: 'fake ingredient' }]
+        }
+
+        describe('and the recipe exists', () => {
+          it('updates the recipe', (done) => {
+            req.params = { id: 'testId' }
+            req.body = testRecipe
+
+            recipeReplaceOneStub.returns(Promise.resolve(dbRecipe))
+
+            res.on('end', () => {
+              expect(recipeReplaceOneStub.callCount).to.equal(1)
+              expect(recipeReplaceOneStub).to.have.been.calledWith({ _id: 'testId' })
+              expect(res._getStatusCode()).to.equal(204)
+              done()
+            })
+
+            recipesController.update(req, res)
+          })
+        })
+
+        describe('but the recipe does not exist', () => {
+          it('returns a 404 error', (done) => {
+            req.params = { id: 'norecipe' }
+            req.body = testRecipe
+
+            recipeReplaceOneStub.returns(Promise.resolve(null))
+
+            res.on('end', () => {
+              expect(recipeReplaceOneStub.callCount).to.equal(1)
+              expect(recipeReplaceOneStub).to.have.been.calledWith({ _id: 'norecipe' })
+              expect(res._getStatusCode()).to.equal(404)
+              done()
+            })
+
+            recipesController.update(req, res)
+          })
+        })
+
+        context('and the call to update the document fails', () => {
+          it('returns 500 and the error', (done) => {
+            req.params = { id: 'testId' }
+            req.body = testRecipe
+
+            recipeReplaceOneStub.rejects(new Error('Error searching'))
+
+            res.on('end', () => {
+              expect(recipeReplaceOneStub.callCount).to.equal(1)
+              expect(recipeReplaceOneStub).to.have.been.calledWith({ _id: 'testId' })
+              expect(res._getStatusCode()).to.equal(500)
+              expect(res._getData()).to.equal('Error searching')
+              done()
+            })
+
+            recipesController.update(req, res)
+          })
+        })
+      })
+
+      describe('receives a request without id', () => {
+        it('returns a 400 error', (done) => {
+          req.params = { }
+          req.body = testRecipe
+
+          res.on('end', () => {
+            expect(recipeReplaceOneStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(400)
+            expect(res._getData()).to.deep.equal('missing recipe id or body')
+            done()
+          })
+
+          recipesController.update(req, res)
+        })
+      })
+
+      describe('receives a request without a body', () => {
+        it('returns a 400 error', (done) => {
+          req.params = { id: 'testId' }
+          req.body = null
+
+          res.on('end', () => {
+            expect(recipeReplaceOneStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(400)
+            expect(res._getData()).to.deep.equal('missing recipe id or body')
+            done()
+          })
+
+          recipesController.update(req, res)
         })
       })
     })
@@ -664,14 +781,14 @@ describe('Recipes controller', () => {
         userId: 'user1',
         title: 'beef pie',
         ingredients: '1 onion\n500g minced beef',
-        tags: 'dinner tasty'
+        tags: 'dinner, tasty,good, with space '
       }
 
       let processedRecipe = {
         userId: 'user1',
         title: 'beef pie',
         ingredients: [{ quantity: '1', name: 'onion' }, { quantity: '500', unit: 'g', name: 'minced beef' }],
-        tags: ['dinner', 'tasty']
+        tags: ['dinner', 'tasty', 'good', 'with space']
       }
 
       it('returns a processed recipe with tags', () => {

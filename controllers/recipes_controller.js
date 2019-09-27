@@ -48,9 +48,9 @@ module.exports = {
    * @param req {request object}
    * @param res {response object}
    */
-  getRecipe (req, res) {
+  get (req, res) {
     if (req.params.id) {
-      Recipe.findOne({ _id: req.params.id })
+      return Recipe.findOne({ _id: req.params.id })
         .then(dbRecipe => {
           if (dbRecipe) {
             res.send(dbRecipe)
@@ -62,7 +62,34 @@ module.exports = {
           return res.status(500).send(error.message) // TODO: change for custom error message
         })
     } else {
-      res.status(400).send('missing recipe id')
+      res.status(400).send('missing recipe ID')
+    }
+  },
+
+  /**
+   * Update a recipe using the recipe model
+   * @param req {request object}
+   * @param res {response object}
+   */
+  update (req, res) {
+    if (req.params.id && req.body && req.userId) {
+      let recipe = req.body
+      recipe = module.exports.processRecipe(recipe)
+      recipe.userId = req.userId
+
+      return Recipe.replaceOne({ _id: req.params.id }, recipe)
+        .then(dbRecipe => {
+          if (dbRecipe) {
+            return res.sendStatus(204)
+          } else {
+            return res.sendStatus(404)
+          }
+        })
+        .catch((error) => {
+          return res.status(500).send(error.message) // TODO: change for custom error message
+        })
+    } else {
+      res.status(400).send('missing recipe ID or body')
     }
   },
 
@@ -141,7 +168,8 @@ module.exports = {
     recipe.ingredients = ingredients
 
     if (recipe.tags) {
-      recipe.tags = recipe.tags.split(' ')
+      let tags = recipe.tags.split(',')
+      recipe.tags = tags.map(s => s.trim())
     }
 
     return recipe

@@ -42,14 +42,14 @@ module.exports = {
 
 module.exports.internal = {
   async verifyToken (token) {
-    const client = module.exports.internal.getOauthClient()
+    const client = module.exports.internal.getOauthClient(WEBCLIENT_ID)
     const ticket = await client.verifyIdToken({
       idToken: token,
       audience: WEBCLIENT_ID
     })
-    const payload = ticket.getPayload()
-    const userid = payload['sub']
-    return Promise.resolve(userid)
+    const payload = ticket.getPayload(CLIENT_ID)
+    const userId = payload['sub']
+    return Promise.resolve(userId)
   },
   async getUserIdFromTokenInfo (token) {
     const client = module.exports.internal.getOauthClient()
@@ -57,7 +57,7 @@ module.exports.internal = {
     return Promise.resolve(tokenInfo.sub)
   },
   /* istanbul ignore next */
-  getOauthClient () {
-    return new OAuth2Client(CLIENT_ID)
+  getOauthClient (clientId) {
+    return new OAuth2Client(clientId)
   }
 }

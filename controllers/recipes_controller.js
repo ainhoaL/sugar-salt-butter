@@ -3,10 +3,10 @@ const Recipe = require('../models/recipe')
 module.exports = {
 
   /**
-     * Create recipe using the recipe model
-     * @param req {request object}
-     * @param res {response object}
-     */
+   * Create recipe using the recipe model
+   * @param req {request object}
+   * @param res {response object}
+   */
   create (req, res) {
     if (req.body && req.body.ingredients && req.userId) {
       let recipe = req.body
@@ -67,11 +67,11 @@ module.exports = {
   },
 
   /**
-     * Given a multiline string with a list of ingredients it returns a standardized array of ingredients
-     * It standardizes the ingredients units so all ingredients are always stored with same units for easier conversion later on
-     * @param ingredientsText {string} - a multiline string with 1 ingredient per line
-     * @returns {Array} - array of ingredient objects { quantity (string), unit (string), name (string) }
-     */
+   * Given a multiline string with a list of ingredients it returns a standardized array of ingredients
+   * It standardizes the ingredients units so all ingredients are always stored with same units for easier conversion later on
+   * @param ingredientsText {string} - a multiline string with 1 ingredient per line
+   * @returns {Array} - array of ingredient objects { quantity (string), unit (string), name (string) }
+   */
   parseIngredients (ingredientsText) {
     // separate each ingredient in quantity, unit and name.
     // To find the unit type, using an array of possible units regexes to look for in the ingredients

@@ -16,6 +16,9 @@ describe('Recipes controller', () => {
     beforeEach(() => {
       req = httpMocks.createRequest({})
       res = httpMocks.createResponse({ eventEmitter: events.EventEmitter })
+
+      // set defaults
+      req.userId = 'testUserId'
     })
 
     describe('create', () => {
@@ -29,20 +32,32 @@ describe('Recipes controller', () => {
         recipeCreateStub.restore()
       })
 
-      describe('receives a recipe without ingredients', () => {
+      describe('receives a request without some parameters', () => {
         let testRecipe = {
           userId: 'testUserId',
           title: 'test cake'
         }
 
-        it('does not create a recipe in the database', (done) => {
+        it('does not create a recipe in the database if recipe body has no ingredients', (done) => {
           req.body = testRecipe
-          req.userId = 'testUserId'
 
           res.on('end', () => {
             expect(recipeCreateStub.callCount).to.equal(0)
             expect(res._getStatusCode()).to.equal(200)
             expect(res._getData()).to.deep.equal({})
+            done()
+          })
+
+          recipesController.create(req, res)
+        })
+
+        it('returns an error if request has no userId', (done) => {
+          req.body = testRecipe
+          req.userId = null
+
+          res.on('end', () => {
+            expect(recipeCreateStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(401)
             done()
           })
 
@@ -66,7 +81,6 @@ describe('Recipes controller', () => {
 
         it('creates a new recipe', (done) => {
           req.body = testRecipe
-          req.userId = 'testUserId'
 
           recipeCreateStub.resolves(dbRecipe)
 
@@ -107,7 +121,6 @@ describe('Recipes controller', () => {
 
         it('finds the recipe and returns it', (done) => {
           req.query = query
-          req.userId = 'testUserId'
 
           recipeFindOneStub.resolves(dbRecipe)
 
@@ -124,7 +137,6 @@ describe('Recipes controller', () => {
 
         it('does not find the recipe and returns 404', (done) => {
           req.query = query
-          req.userId = 'testUserId'
 
           recipeFindOneStub.resolves(null)
 
@@ -141,7 +153,6 @@ describe('Recipes controller', () => {
         context('and the search fails', () => {
           it('returns 500 and the error', (done) => {
             req.query = query
-            req.userId = 'testUserId'
 
             recipeFindOneStub.rejects(new Error('Error searching'))
 
@@ -161,7 +172,6 @@ describe('Recipes controller', () => {
       describe('receives a request to find a recipe but it has no url', () => {
         it('does not search for the recipe', (done) => {
           req.query = { }
-          req.userId = 'testUserId'
 
           res.on('end', () => {
             expect(recipeFindOneStub.callCount).to.equal(0)
@@ -175,12 +185,13 @@ describe('Recipes controller', () => {
       describe('receives a request to find a recipe by url but it has no userId', () => {
         let query = { url: 'http://testrecipe.com/blah' }
 
-        it('does not search for the recipe and returns an empty object', (done) => {
+        it('does not search for the recipe and returns an error', (done) => {
           req.query = query
+          req.userId = null
 
           res.on('end', () => {
             expect(recipeFindOneStub.callCount).to.equal(0)
-            expect(res._getStatusCode()).to.equal(501)
+            expect(res._getStatusCode()).to.equal(401)
             done()
           })
           recipesController.find(req, res)
@@ -261,14 +272,29 @@ describe('Recipes controller', () => {
         })
       })
 
-      describe('receives a request without id', () => {
+      describe('receives a request without recipe id', () => {
         it('returns a 400 error', (done) => {
           req.params = { }
 
           res.on('end', () => {
             expect(recipeFindOneStub.callCount).to.equal(0)
             expect(res._getStatusCode()).to.equal(400)
-            expect(res._getData()).to.deep.equal('missing recipe id')
+            expect(res._getData()).to.deep.equal('missing recipe ID')
+            done()
+          })
+
+          recipesController.get(req, res)
+        })
+      })
+
+      describe('receives a request without userId id', () => {
+        it('returns a 400 error', (done) => {
+          req.params = { }
+          req.userId = null
+
+          res.on('end', () => {
+            expect(recipeFindOneStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(401)
             done()
           })
 
@@ -369,7 +395,7 @@ describe('Recipes controller', () => {
           res.on('end', () => {
             expect(recipeReplaceOneStub.callCount).to.equal(0)
             expect(res._getStatusCode()).to.equal(400)
-            expect(res._getData()).to.deep.equal('missing recipe id or body')
+            expect(res._getData()).to.deep.equal('missing recipe ID or body')
             done()
           })
 
@@ -385,7 +411,23 @@ describe('Recipes controller', () => {
           res.on('end', () => {
             expect(recipeReplaceOneStub.callCount).to.equal(0)
             expect(res._getStatusCode()).to.equal(400)
-            expect(res._getData()).to.deep.equal('missing recipe id or body')
+            expect(res._getData()).to.deep.equal('missing recipe ID or body')
+            done()
+          })
+
+          recipesController.update(req, res)
+        })
+      })
+
+      describe('receives a request without a userId', () => {
+        it('returns a 400 error', (done) => {
+          req.params = { id: 'testId' }
+          req.body = testRecipe
+          req.userId = null
+
+          res.on('end', () => {
+            expect(recipeReplaceOneStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(401)
             done()
           })
 

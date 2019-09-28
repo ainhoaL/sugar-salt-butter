@@ -8,7 +8,10 @@ module.exports = {
    * @param res {response object}
    */
   create (req, res) {
-    if (req.body && req.body.ingredients && req.userId) {
+    if (!req.userId) {
+      return res.sendStatus(401) // Not authorized
+    }
+    if (req.body && req.body.ingredients) {
       let recipe = req.body
       recipe = module.exports.processRecipe(recipe)
       recipe.userId = req.userId
@@ -26,7 +29,10 @@ module.exports = {
    * @param res {response object}
    */
   find (req, res) {
-    if (req.query && req.query.url && req.userId) { // For now only search by url
+    if (!req.userId) {
+      return res.sendStatus(401) // Not authorized
+    }
+    if (req.query && req.query.url) { // For now only search by url
       return Recipe.findOne({ url: req.query.url, userId: req.userId })
         .then(dbRecipe => {
           if (dbRecipe) {
@@ -49,6 +55,9 @@ module.exports = {
    * @param res {response object}
    */
   get (req, res) {
+    if (!req.userId) {
+      return res.sendStatus(401) // Not authorized
+    }
     if (req.params.id) {
       return Recipe.findOne({ _id: req.params.id })
         .then(dbRecipe => {
@@ -72,7 +81,10 @@ module.exports = {
    * @param res {response object}
    */
   update (req, res) {
-    if (req.params.id && req.body && req.userId) {
+    if (!req.userId) {
+      return res.sendStatus(401) // Not authorized
+    }
+    if (req.params.id && req.body) {
       let recipe = req.body
       recipe = module.exports.processRecipe(recipe)
       recipe.userId = req.userId

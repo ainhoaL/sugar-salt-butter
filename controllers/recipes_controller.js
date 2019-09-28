@@ -3,14 +3,18 @@ const Recipe = require('../models/recipe')
 module.exports = {
 
   /**
-     * Create recipe using the recipe model
-     * @param req {request object}
-     * @param res {response object}
-     */
+   * Create recipe using the recipe model
+   * @param req {request object}
+   * @param res {response object}
+   */
   create (req, res) {
+    if (!req.userId) {
+      return res.sendStatus(401) // Not authorized
+    }
     if (req.body && req.body.ingredients) {
       let recipe = req.body
       recipe = module.exports.processRecipe(recipe)
+      recipe.userId = req.userId
 
       // TODO: for now assuming that the request is in the same format as the recipe model
       return Recipe.create(recipe).then(dbRecipe => res.send(dbRecipe))
@@ -25,8 +29,11 @@ module.exports = {
    * @param res {response object}
    */
   find (req, res) {
-    if (req.query && req.query.url && req.query.userId) { // For now only search by url
-      return Recipe.findOne({ url: req.query.url, userId: req.query.userId })
+    if (!req.userId) {
+      return res.sendStatus(401) // Not authorized
+    }
+    if (req.query && req.query.url) { // For now only search by url
+      return Recipe.findOne({ url: req.query.url, userId: req.userId })
         .then(dbRecipe => {
           if (dbRecipe) {
             return res.send(dbRecipe)
@@ -48,6 +55,9 @@ module.exports = {
    * @param res {response object}
    */
   get (req, res) {
+    if (!req.userId) {
+      return res.sendStatus(401) // Not authorized
+    }
     if (req.params.id) {
       return Recipe.findOne({ _id: req.params.id })
         .then(dbRecipe => {
@@ -61,7 +71,7 @@ module.exports = {
           return res.status(500).send(error.message) // TODO: change for custom error message
         })
     } else {
-      res.status(400).send('missing recipe id')
+      res.status(400).send('missing recipe ID')
     }
   },
 
@@ -71,9 +81,13 @@ module.exports = {
    * @param res {response object}
    */
   update (req, res) {
+    if (!req.userId) {
+      return res.sendStatus(401) // Not authorized
+    }
     if (req.params.id && req.body) {
       let recipe = req.body
       recipe = module.exports.processRecipe(recipe)
+      recipe.userId = req.userId
 
       return Recipe.replaceOne({ _id: req.params.id }, recipe)
         .then(dbRecipe => {
@@ -87,16 +101,16 @@ module.exports = {
           return res.status(500).send(error.message) // TODO: change for custom error message
         })
     } else {
-      res.status(400).send('missing recipe id or body')
+      res.status(400).send('missing recipe ID or body')
     }
   },
 
   /**
-     * Given a multiline string with a list of ingredients it returns a standardized array of ingredients
-     * It standardizes the ingredients units so all ingredients are always stored with same units for easier conversion later on
-     * @param ingredientsText {string} - a multiline string with 1 ingredient per line
-     * @returns {Array} - array of ingredient objects { quantity (string), unit (string), name (string) }
-     */
+   * Given a multiline string with a list of ingredients it returns a standardized array of ingredients
+   * It standardizes the ingredients units so all ingredients are always stored with same units for easier conversion later on
+   * @param ingredientsText {string} - a multiline string with 1 ingredient per line
+   * @returns {Array} - array of ingredient objects { quantity (string), unit (string), name (string) }
+   */
   parseIngredients (ingredientsText) {
     // separate each ingredient in quantity, unit and name.
     // To find the unit type, using an array of possible units regexes to look for in the ingredients

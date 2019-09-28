@@ -34,6 +34,8 @@ paths:
       responses:
         200:
           description: "OK - Recipe created"
+        401:
+          description: "Unauthorized"
   /recipes/{id}:
     get:
       tags:
@@ -61,7 +63,9 @@ paths:
         204:
           description: "OK - Recipe updated"
         400:
-          description: "Bad Request - missing recipe id"
+          description: "Bad Request - missing recipe ID"
+        401:
+          description: "Unauthorized"
         404:
           description: "Not Found"
         500:
@@ -90,7 +94,9 @@ paths:
               schema:
                 $ref: '#/definitions/Recipe'
         400:
-          description: "Bad Request - missing recipe id or body"
+          description: "Bad Request - missing recipe ID or body"
+        401:
+          description: "Unauthorized"
         404:
           description: "Not Found"
         500:
@@ -128,6 +134,8 @@ paths:
                 $ref: '#/definitions/Recipe'
         404:
           description: "Not Found"
+        401:
+          description: "Unauthorized"
         500:
           description: "Internal Server Error"
         501:

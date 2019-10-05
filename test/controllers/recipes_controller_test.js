@@ -440,10 +440,10 @@ describe('Recipes controller', () => {
   describe('parseIngredients', () => {
     describe('when the recipe has only one type of unit:', () => {
       describe('grams', () => {
-        let expectedIngredients = [{ quantity: '10', unit: 'g', name: 'butter' }, { quantity: '1', unit: 'g', name: 'salt' }, { quantity: '1/2', unit: 'g', name: 'pepper' }, { quantity: '1 3/4', unit: 'g', name: 'flour' }, { quantity: '20.5', unit: 'g', name: 'sugar' }]
+        let expectedIngredients = [{ quantity: '10', unit: 'g', name: 'butter' }, { quantity: '1', unit: 'g', name: 'salt' }, { quantity: '1/2', unit: 'g', name: 'pepper' }, { quantity: '1 3/4', unit: 'g', name: 'flour' }, { quantity: '20.5', unit: 'g', name: 'icing sugar' }]
 
         it('returns the correct parsed ingredients when it is formatted "Qty grams Ingredient"', () => {
-          let recipe = '10 grams butter\n1 gram salt\n1/2 gram pepper\n1 3/4 gram flour\n20.5 grams sugar'
+          let recipe = '10 grams butter\n1 gram salt\n1/2 gram pepper\n1 3/4 gram flour\n20.5 grams icing sugar'
 
           let parsedIngredients = recipesController.parseIngredients(recipe)
           expect(parsedIngredients.length).to.equal(5)
@@ -451,7 +451,7 @@ describe('Recipes controller', () => {
         })
 
         it('returns the correct parsed ingredients when it is formatted "Qty g Ingredient"', () => {
-          let recipe = '10 g butter\n1 g salt\n1/2 g pepper\n1 3/4 g flour\n20.5 g sugar'
+          let recipe = '10 g butter\n1 g salt\n1/2 g pepper\n1 3/4 g flour\n20.5 g icing sugar'
 
           let parsedIngredients = recipesController.parseIngredients(recipe)
           expect(parsedIngredients.length).to.equal(5)
@@ -459,7 +459,7 @@ describe('Recipes controller', () => {
         })
 
         it('returns the correct parsed ingredients when it is formatted "Qtyg Ingredient"', () => {
-          let recipe = '10g butter\n1g salt\n1/2g pepper\n1 3/4g flour\n20.5g sugar'
+          let recipe = '10g butter\n1g salt\n1/2g pepper\n1 3/4g flour\n20.5g icing sugar'
 
           let parsedIngredients = recipesController.parseIngredients(recipe)
           expect(parsedIngredients.length).to.equal(5)
@@ -467,7 +467,7 @@ describe('Recipes controller', () => {
         })
 
         it('returns the correct parsed ingredients when it is formatted "Qty g. Ingredient"', () => {
-          let recipe = '10 g. butter\n1 g. salt\n1/2 g. pepper\n1 3/4 g. flour\n20.5 g. sugar'
+          let recipe = '10 g. butter\n1 g. salt\n1/2 g. pepper\n1 3/4 g. flour\n20.5 g. icing sugar'
 
           let parsedIngredients = recipesController.parseIngredients(recipe)
           expect(parsedIngredients.length).to.equal(5)
@@ -475,7 +475,7 @@ describe('Recipes controller', () => {
         })
 
         it('returns the correct parsed ingredients when it is formatted "Qtyg. Ingredient"', () => {
-          let recipe = '10g. butter\n1g. salt\n1/2g. pepper\n1 3/4g. flour\n20.5g. sugar'
+          let recipe = '10g. butter\n1g. salt\n1/2g. pepper\n1 3/4g. flour\n20.5g. icing sugar'
 
           let parsedIngredients = recipesController.parseIngredients(recipe)
           expect(parsedIngredients.length).to.equal(5)
@@ -483,7 +483,7 @@ describe('Recipes controller', () => {
         })
 
         it('returns the correct parsed ingredients when it is formatted "Qty gr Ingredient"', () => {
-          let recipe = '10 gr butter\n1 gr salt\n1/2 gr pepper\n1 3/4 gr flour\n20.5 grs sugar'
+          let recipe = '10 gr butter\n1 gr salt\n1/2 gr pepper\n1 3/4 gr flour\n20.5 grs icing sugar'
 
           let parsedIngredients = recipesController.parseIngredients(recipe)
           expect(parsedIngredients.length).to.equal(5)
@@ -502,32 +502,8 @@ describe('Recipes controller', () => {
           expect(parsedIngredients).to.deep.equal(expectedIngredients)
         })
 
-        it('returns the correct parsed ingredients when it is formatted "Qty c Ingredient"', () => {
-          let recipe = '10 c butter\n1 c salt\n1/2 c pepper\n1 3/4 c flour\n20.5 c sugar'
-
-          let parsedIngredients = recipesController.parseIngredients(recipe)
-          expect(parsedIngredients.length).to.equal(5)
-          expect(parsedIngredients).to.deep.equal(expectedIngredients)
-        })
-
         it('returns the correct parsed ingredients when it is formatted "Qtycups Ingredient"', () => {
           let recipe = '10cups butter\n1cup salt\n1/2cup pepper\n1 3/4cup flour\n20.5cups sugar'
-
-          let parsedIngredients = recipesController.parseIngredients(recipe)
-          expect(parsedIngredients.length).to.equal(5)
-          expect(parsedIngredients).to.deep.equal(expectedIngredients)
-        })
-
-        it('returns the correct parsed ingredients when it is formatted "Qty C Ingredient"', () => {
-          let recipe = '10 C butter\n1 C salt\n1/2 C pepper\n1 3/4 C flour\n20.5 C sugar'
-
-          let parsedIngredients = recipesController.parseIngredients(recipe)
-          expect(parsedIngredients.length).to.equal(5)
-          expect(parsedIngredients).to.deep.equal(expectedIngredients)
-        })
-
-        it('returns the correct parsed ingredients when it is formatted "Qtyc Ingredient"', () => {
-          let recipe = '10c butter\n1c salt\n1/2c pepper\n1 3/4c flour\n20.5c sugar'
 
           let parsedIngredients = recipesController.parseIngredients(recipe)
           expect(parsedIngredients.length).to.equal(5)
@@ -784,6 +760,50 @@ describe('Recipes controller', () => {
 
         it('returns the correct parsed ingredients when it is formatted "Qty kg. Ingredient"', () => {
           let recipe = '10 kg. butter\n1 kg. salt\n1/2 kg. pepper\n1 3/4 kg. flour\n20.5 kg. sugar'
+
+          let parsedIngredients = recipesController.parseIngredients(recipe)
+          expect(parsedIngredients.length).to.equal(5)
+          expect(parsedIngredients).to.deep.equal(expectedIngredients)
+        })
+      })
+
+      describe('pound', () => {
+        let expectedIngredients = [{ quantity: '10', unit: 'lb', name: 'butter' }, { quantity: '1', unit: 'lb', name: 'salt' }, { quantity: '1/2', unit: 'lb', name: 'pepper' }, { quantity: '1 3/4', unit: 'lb', name: 'flour' }, { quantity: '20.5', unit: 'lb', name: 'sugar' }]
+
+        it('returns the correct parsed ingredients when it is formatted "Qty pounds Ingredient"', () => {
+          let recipe = '10 pounds butter\n1 pound salt\n1/2 pound pepper\n1 3/4 pounds flour\n20.5 pounds sugar'
+
+          let parsedIngredients = recipesController.parseIngredients(recipe)
+          expect(parsedIngredients.length).to.equal(5)
+          expect(parsedIngredients).to.deep.equal(expectedIngredients)
+        })
+
+        it('returns the correct parsed ingredients when it is formatted "Qtypounds Ingredient"', () => {
+          let recipe = '10pounds butter\n1pound salt\n1/2pound pepper\n1 3/4pound flour\n20.5pounds sugar'
+
+          let parsedIngredients = recipesController.parseIngredients(recipe)
+          expect(parsedIngredients.length).to.equal(5)
+          expect(parsedIngredients).to.deep.equal(expectedIngredients)
+        })
+
+        it('returns the correct parsed ingredients when it is formatted "Qty lb Ingredient"', () => {
+          let recipe = '10 lbs butter\n1 lb salt\n1/2 lb pepper\n1 3/4 lbs flour\n20.5 lbs sugar'
+
+          let parsedIngredients = recipesController.parseIngredients(recipe)
+          expect(parsedIngredients.length).to.equal(5)
+          expect(parsedIngredients).to.deep.equal(expectedIngredients)
+        })
+
+        it('returns the correct parsed ingredients when it is formatted "Qty Lb Ingredient"', () => {
+          let recipe = '10 Lbs butter\n1 Lb salt\n1/2 Lb pepper\n1 3/4 Lbs flour\n20.5 Lbs sugar'
+
+          let parsedIngredients = recipesController.parseIngredients(recipe)
+          expect(parsedIngredients.length).to.equal(5)
+          expect(parsedIngredients).to.deep.equal(expectedIngredients)
+        })
+
+        it('returns the correct parsed ingredients when it is formatted "Qty lb. Ingredient"', () => {
+          let recipe = '10 Lbs. butter\n1 lb. salt\n1/2lb. pepper\n1 3/4Lbs. flour\n20.5lbs. sugar'
 
           let parsedIngredients = recipesController.parseIngredients(recipe)
           expect(parsedIngredients.length).to.equal(5)

@@ -108,6 +108,7 @@ module.exports = {
   /**
    * Given a multiline string with a list of ingredients it returns a standardized array of ingredients
    * It standardizes the ingredients units so all ingredients are always stored with same units for easier conversion later on
+   * It also groups ingredients by sections. A group name starts with #. Any ingredient after it will belong to that group
    * @param ingredientsText {string} - a multiline string with 1 ingredient per line
    * @returns {Array} - array of ingredient objects { quantity (string), unit (string), name (string) }
    */
@@ -116,7 +117,6 @@ module.exports = {
     // To find the unit type, using an array of possible units regexes to look for in the ingredients
     const units = [
       { name: 'cup', regex: /cup[s]?/ },
-      { name: 'cup', regex: /[cC][s]?[.]?\s/ },
       { name: 'tsp', regex: /tsp[s]?[.]?/ },
       { name: 'tsp', regex: /teaspoon[s]?/ },
       { name: 'tsp', regex: /([0-9]|[\xbc\xbd\xbe])+\s?t[s]?\s/, findUnitRegex: /t[s]?\s/ },
@@ -132,8 +132,10 @@ module.exports = {
       { name: 'ml', regex: /m[Ll][s]?[.]?/ },
       { name: 'ml', regex: /milliliter[s]?/ },
       { name: 'ml', regex: /mil[s]?[.]?/ },
-      { name: 'oz', regex: /oz[s]?[.]?/ },
+      { name: 'oz', regex: /([0-9]|[\xbc\xbd\xbe])+\s?oz[s]?[.]?\s/, findUnitRegex: /oz[s]?[.]?\s/ },
       { name: 'oz', regex: /ounce[s]?[.]?/ },
+      { name: 'lb', regex: /[Ll]b[s]?[.]?\s/ },
+      { name: 'lb', regex: /pound[s]?/ },
       { name: 'l', regex: /([0-9]|[\xbc\xbd\xbe])+\s?[Ll][s]?[.]?\s/, findUnitRegex: /[Ll][s]?[.]?\s/ },
       { name: 'l', regex: /liter[s]?/ }]
 
@@ -148,6 +150,7 @@ module.exports = {
         let unitCount = 0
         let found = false
 
+        ingredient = ingredient.trim() // Get rid of any spaces before/after ingredient
         while (!found && unitCount < units.length) {
           found = units[unitCount].regex.test(ingredient)
           unitCount++
@@ -157,11 +160,14 @@ module.exports = {
           let unitEntry = units[unitCount - 1]
           let regexForUnit = unitEntry.findUnitRegex || unitEntry.regex
 
-          let splitArray = ingredient.split(regexForUnit)
-          let quantity = splitArray[0].trim() // TODO: check it is a number
+          let regexResults = regexForUnit.exec(ingredient)
+          let startIndex = regexResults.index
+          let matchString = regexResults[0]
 
+          let quantity = ingredient.substr(0, startIndex).trim()
+          let name = ingredient.substr(startIndex + matchString.length, ingredient.length - 1).trim()
           let unit = unitEntry.name
-          let name = splitArray[1].trim()
+
           ingredientObject = { quantity, unit, name }
         } else { // It does not match any of the unit regex
           // If there is no unit, then this ingredient has the shape <Quantity Name> or just <Name>

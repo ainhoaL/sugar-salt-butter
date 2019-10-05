@@ -56,6 +56,10 @@ const RecipeSchema = new Schema({
     type: Boolean,
     default: false
   },
+  done: {
+    type: Boolean,
+    default: false
+  },
   servings: {
     type: Number
   },

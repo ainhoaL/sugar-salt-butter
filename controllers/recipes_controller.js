@@ -117,6 +117,7 @@ module.exports = {
     // To find the unit type, using an array of possible units regexes to look for in the ingredients
     const units = [
       { name: 'cup', regex: /cup[s]?/ },
+      { name: 'cup', regex: /([0-9]|[\xbc\xbd\xbe])+\s?[cC][s]?[.]?\s/, findUnitRegex: /[cC][s]?[.]?\s/ },
       { name: 'tsp', regex: /tsp[s]?[.]?/ },
       { name: 'tsp', regex: /teaspoon[s]?/ },
       { name: 'tsp', regex: /([0-9]|[\xbc\xbd\xbe])+\s?t[s]?\s/, findUnitRegex: /t[s]?\s/ },

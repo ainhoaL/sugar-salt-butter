@@ -78,13 +78,13 @@ const RecipeSchema = new Schema({
   storage: {
     type: String
   },
-  freezes: {
+  freezable: {
     type: Boolean
   },
   equipment: {
     type: String
   },
-  macros: {
+  nutrition: {
     type: { carbs: Number, protein: Number, fat: Number, calories: Number }
   }
 })

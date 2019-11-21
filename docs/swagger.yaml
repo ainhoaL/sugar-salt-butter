@@ -211,13 +211,13 @@ definitions:
       storage:
         type: "string"
         example: "in a container for up to 1 week"
-      freezes:
+      freezable:
         type: "boolean"
         example: true
       equipment:
         type: "string"
         example: "bowl, spoon for mixing and baking tray"
-      macros:
+      nutrition:
         $ref: "#/definitions/NutritionalInfo"
     xml:
       name: "Recipe"

@@ -144,10 +144,11 @@ module.exports = {
     let ingredientsArray = ingredientsText.split(/\r?\n/) // Split by lines
     let ingredientGroup
     ingredientsArray.forEach((ingredient) => {
+      ingredient = ingredient.trim()
       if (ingredient.indexOf('#') > -1) {
         let ingredientHeader = ingredient.split('#')
         ingredientGroup = ingredientHeader[1].trim()
-      } else {
+      } else if (ingredient.length > 0) {
         let unitCount = 0
         let found = false
 

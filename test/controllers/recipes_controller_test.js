@@ -853,6 +853,23 @@ describe('Recipes controller', () => {
         expect(parsedIngredients).to.deep.equal(expectedIngredients)
       })
     })
+
+    describe('when the recipe has empty lines', () => {
+      let expectedIngredients = [
+        { quantity: '100', unit: 'g', name: 'almonds' },
+        { quantity: '2', name: 'sprigs of thyme' },
+        { quantity: '2', unit: 'cup', name: 'sugar', group: 'glaze' },
+        { quantity: '4', unit: 'tbsp', name: 'butter', group: 'glaze' },
+        { quantity: '1', name: 'chocolate bar', group: 'decoration' }
+      ]
+      it('does not save empty ingredients', () => {
+        let recipe = ' 100 g almonds\n\n2 sprigs of thyme \n\n # glaze \n2 cups sugar \n \n   \n\n4 tbsp butter\n# decoration\n\n1 chocolate bar'
+
+        let parsedIngredients = recipesController.parseIngredients(recipe)
+        expect(parsedIngredients.length).to.equal(5)
+        expect(parsedIngredients).to.deep.equal(expectedIngredients)
+      })
+    })
   })
 
   describe('processRecipe', () => {

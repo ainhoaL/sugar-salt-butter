@@ -99,13 +99,16 @@ describe('Recipes controller', () => {
 
     describe('find', () => {
       let recipeFindOneStub
+      let recipeFindStub
 
       beforeEach(() => {
         recipeFindOneStub = sinon.stub(Recipe, 'findOne')
+        recipeFindStub = sinon.stub(Recipe, 'find')
       })
 
       afterEach(() => {
         recipeFindOneStub.restore()
+        recipeFindStub.restore()
       })
 
       describe('receives a request to find a recipe by url', () => {
@@ -169,7 +172,7 @@ describe('Recipes controller', () => {
         })
       })
 
-      describe('receives a request to find a recipe but it has no url', () => {
+      describe('receives a request to find a recipe but it has no url and no search string', () => {
         it('does not search for the recipe', (done) => {
           req.query = { }
 
@@ -195,6 +198,96 @@ describe('Recipes controller', () => {
             done()
           })
           recipesController.find(req, res)
+        })
+      })
+
+      describe('receives a request to find a recipe but it has no query', () => {
+        it('does not search for the recipe and returns an error', (done) => {
+          req.query = null
+
+          res.on('end', () => {
+            expect(recipeFindOneStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(501)
+            done()
+          })
+          recipesController.find(req, res)
+        })
+      })
+
+      describe('receives a request to search recipes with a search string', () => {
+        const query = { userId: 'testUserId', searchString: 'ice cream' }
+        const expectedQuery = { $text: { $search: '"ice" "cream"' }, userId: 'testUserId' }
+        const sortStub = sinon.stub()
+        const findFn = (search, score) => {
+          expect(search).to.deep.equal(expectedQuery)
+          expect(score).to.deep.equal({ score: { $meta: 'textScore' } })
+          return {
+            sort: sortStub
+          }
+        }
+
+        const dbRecipes = [{
+          _id: 'testId1',
+          userId: 'testUserId',
+          url: 'http://testrecipe.com/blah',
+          title: 'vanilla ice cream',
+          ingredients: [{ quantity: null, unit: null, name: 'fake ingredient' }]
+        }, {
+          _id: 'testId2',
+          userId: 'testUserId',
+          url: 'http://testrecipe.com/test1',
+          title: 'strawberry ice cream',
+          ingredients: [{ quantity: '1', unit: 'cup', name: 'cream' }]
+        }]
+
+        beforeEach(() => {
+          recipeFindStub.callsFake(findFn)
+        })
+
+        it('finds recipes and returns them', (done) => {
+          req.query = query
+
+          sortStub.resolves(dbRecipes)
+
+          res.on('end', () => {
+            expect(recipeFindStub.callCount).to.equal(1)
+            expect(res._getStatusCode()).to.equal(200)
+            expect(res._getData()).to.deep.equal(dbRecipes)
+            done()
+          })
+
+          recipesController.find(req, res)
+        })
+
+        it('does not find recipes and returns empty', (done) => {
+          req.query = query
+
+          sortStub.resolves([])
+
+          res.on('end', () => {
+            expect(recipeFindStub.callCount).to.equal(1)
+            expect(res._getStatusCode()).to.equal(200)
+            expect(res._getData()).to.deep.equal([])
+            done()
+          })
+
+          recipesController.find(req, res)
+        })
+
+        context('and the search fails', () => {
+          it('returns 500 and the error', (done) => {
+            req.query = query
+
+            sortStub.rejects(new Error('Error searching'))
+
+            res.on('end', () => {
+              expect(recipeFindStub.callCount).to.equal(1)
+              expect(res._getStatusCode()).to.equal(500)
+              expect(res._getData()).to.equal('Error searching')
+              done()
+            })
+            recipesController.find(req, res)
+          })
         })
       })
     })

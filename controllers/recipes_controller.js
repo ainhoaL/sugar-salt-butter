@@ -45,7 +45,7 @@ module.exports = {
           .catch((error) => {
             return res.status(500).send(error.message) // TODO: change for custom error message
           })
-      } else { // Search to find any recipes matching query elements
+      } else if (req.query.searchString) { // Search to find any recipes matching query elements
         let searchWords = req.query.searchString.split(' ')
         let searchString = '"' + searchWords[0]
         let i = 1
@@ -55,14 +55,16 @@ module.exports = {
         }
         searchString += '"'
         console.log(searchString)
-        return Recipe.find({ $text: { $search: searchString }, userId: req.userId },{ score: { $meta: 'textScore' } }).sort({ score: { $meta: 'textScore' }})
+        return Recipe.find({ $text: { $search: searchString }, userId: req.userId }, { score: { $meta: 'textScore' } }).sort({ score: { $meta: 'textScore' } })
           .then(dbRecipes => {
-            console.log(dbRecipes.length)
             return res.send(dbRecipes)
           })
-          .catch(error => console.log(error))
+          .catch(error => {
+            return res.status(500).send(error.message) // TODO: change for custom error message
+          })
+      } else {
+        res.sendStatus(501)
       }
-      
     } else {
       return res.sendStatus(501)
     }

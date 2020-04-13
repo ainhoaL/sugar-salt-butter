@@ -6,8 +6,8 @@ const sinonChai = require('sinon-chai')
 chai.use(sinonChai)
 
 let app
-let authentication = require('../utils/authentication.js')
-let recipesController = require('../controllers/recipes_controller.js')
+const authentication = require('../utils/authentication.js')
+const recipesController = require('../controllers/recipes_controller.js')
 
 describe('Routes', () => {
   let recipeCreateStub
@@ -16,14 +16,14 @@ describe('Routes', () => {
   let recipeSearchStub
   let verifyStub
 
-  let userId = 'user1'
+  const userId = 'user1'
 
-  let testRecipe = {
+  const testRecipe = {
     userId: userId,
     title: 'test cake'
   }
 
-  let dbRecipe = {
+  const dbRecipe = {
     _id: 'testId',
     userId: userId,
     title: 'test cake'

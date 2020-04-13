@@ -48,7 +48,7 @@ module.exports.internal = {
       audience: WEBCLIENT_ID
     })
     const payload = ticket.getPayload(CLIENT_ID)
-    const userId = payload['sub']
+    const userId = payload.sub
     return Promise.resolve(userId)
   },
   async getUserIdFromTokenInfo (token) {

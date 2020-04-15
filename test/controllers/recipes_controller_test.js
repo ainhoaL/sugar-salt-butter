@@ -223,7 +223,7 @@ describe('Recipes controller', () => {
           expect(search).to.deep.equal(expectedQuery)
           expect(score).to.deep.equal({ score: { $meta: 'textScore' } })
           return {
-            count: countStub,
+            countDocuments: countStub,
             sort: () => {
               return {
                 limit: () => {

@@ -56,7 +56,7 @@ module.exports = {
         searchString += '"'
         let skip = parseInt(req.query.skip)
         let results = { count: 0, recipes: [] }
-        return Recipe.find({ $text: { $search: searchString }, userId: req.userId }, { score: { $meta: 'textScore' } }).count()
+        return Recipe.find({ $text: { $search: searchString }, userId: req.userId }, { score: { $meta: 'textScore' } }).countDocuments()
           .then(count => {
             results.count = count
             if (count > 0) {

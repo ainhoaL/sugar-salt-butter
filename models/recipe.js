@@ -85,6 +85,7 @@ const RecipeSchema = new Schema({
   }
 })
 
+RecipeSchema.index({ title: 'text', 'ingredients.name': 'text', tags: 'text' }, { name: 'My text index', weights: { title: 10, 'ingredients.name': 4, tags: 2 } })
 const Recipe = mongoose.model('recipe', RecipeSchema)
 
 module.exports = Recipe

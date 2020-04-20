@@ -32,18 +32,38 @@ module.exports = {
     if (!req.userId) {
       return res.sendStatus(401) // Not authorized
     }
-    if (req.query && req.query.url) { // For now only search by url
-      return Recipe.findOne({ url: req.query.url, userId: req.userId })
-        .then(dbRecipe => {
-          if (dbRecipe) {
-            return res.send(dbRecipe)
-          } else {
-            return res.sendStatus(404)
-          }
-        })
-        .catch((error) => {
-          return res.status(500).send(error.message) // TODO: change for custom error message
-        })
+    if (req.query) {
+      if (req.query.url) { // Search to find a single recipe by url
+        return Recipe.findOne({ url: req.query.url, userId: req.userId })
+          .then(dbRecipe => {
+            if (dbRecipe) {
+              return res.send(dbRecipe)
+            } else {
+              return res.sendStatus(404)
+            }
+          })
+          .catch((error) => {
+            return res.status(500).send(error.message) // TODO: change for custom error message
+          })
+      } else if (req.query.searchString) { // Search to find any recipes matching query elements
+        const searchWords = req.query.searchString.split(' ')
+        let searchString = '"' + searchWords[0]
+        let i = 1
+        while (i < searchWords.length) {
+          searchString += '" "' + searchWords[i]
+          i++
+        }
+        searchString += '"'
+        return Recipe.find({ $text: { $search: searchString }, userId: req.userId }, { score: { $meta: 'textScore' } }).sort({ score: { $meta: 'textScore' } })
+          .then(dbRecipes => {
+            return res.send(dbRecipes)
+          })
+          .catch(error => {
+            return res.status(500).send(error.message) // TODO: change for custom error message
+          })
+      } else {
+        res.sendStatus(501)
+      }
     } else {
       return res.sendStatus(501)
     }

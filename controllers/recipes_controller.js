@@ -46,7 +46,7 @@ module.exports = {
             return res.status(500).send(error.message) // TODO: change for custom error message
           })
       } else if (req.query.searchString) { // Search to find any recipes matching query elements
-        let searchWords = req.query.searchString.split(' ')
+        const searchWords = req.query.searchString.split(' ')
         let searchString = '"' + searchWords[0]
         let i = 1
         while (i < searchWords.length) {
@@ -54,7 +54,6 @@ module.exports = {
           i++
         }
         searchString += '"'
-        console.log(searchString)
         return Recipe.find({ $text: { $search: searchString }, userId: req.userId }, { score: { $meta: 'textScore' } }).sort({ score: { $meta: 'textScore' } })
           .then(dbRecipes => {
             return res.send(dbRecipes)

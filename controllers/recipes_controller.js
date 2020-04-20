@@ -46,7 +46,7 @@ module.exports = {
             return res.status(500).send(error.message) // TODO: change for custom error message
           })
       } else if (req.query.searchString) { // Search to find any recipes matching query elements
-        let searchWords = req.query.searchString.split(' ')
+        const searchWords = req.query.searchString.split(' ')
         let searchString = '"' + searchWords[0]
         let i = 1
         while (i < searchWords.length) {
@@ -54,8 +54,8 @@ module.exports = {
           i++
         }
         searchString += '"'
-        let skip = parseInt(req.query.skip)
-        let results = { count: 0, recipes: [] }
+        const skip = parseInt(req.query.skip)
+        const results = { count: 0, recipes: [] }
         return Recipe.find({ $text: { $search: searchString }, userId: req.userId }, { score: { $meta: 'textScore' } }).countDocuments()
           .then(count => {
             results.count = count
@@ -168,50 +168,61 @@ module.exports = {
       { name: 'l', regex: /([0-9]|[\xbc\xbd\xbe])+\s?[Ll][s]?[.]?\s/, findUnitRegex: /[Ll][s]?[.]?\s/ },
       { name: 'l', regex: /liter[s]?/ }]
 
-    let formattedIngredients = []
-    let ingredientsArray = ingredientsText.split(/\r?\n/) // Split by lines
+    const formattedIngredients = []
+    const ingredientsArray = ingredientsText.split(/\r?\n/) // Split by lines
+    let ingredientGroup
     ingredientsArray.forEach((ingredient) => {
-      let unitCount = 0
-      let found = false
+      if (ingredient.indexOf('#') > -1) {
+        const ingredientHeader = ingredient.split('#')
+        ingredientGroup = ingredientHeader[1].trim()
+      } else {
+        let unitCount = 0
+        let found = false
 
-      while (!found && unitCount < units.length) {
-        found = units[unitCount].regex.test(ingredient)
-        unitCount++
-      }
-      if (found) { // This ingredient matches one of the unit regexes
-        let unitEntry = units[unitCount - 1]
-        let regexForUnit = unitEntry.findUnitRegex || unitEntry.regex
-
-        let splitArray = ingredient.split(regexForUnit)
-        let quantity = splitArray[0].trim() // TODO: check it is a number
-
-        let unit = unitEntry.name
-        let name = splitArray[1].trim()
-        formattedIngredients.push({ quantity, unit, name })
-      } else { // It does not match any of the unit regex
-        // If there is no unit, then this ingredient has the shape <Quantity Name> or just <Name>
-        let firstSeparation = ingredient.indexOf(' ')
-        let quantity = ingredient.substr(0, firstSeparation).trim() // TODO: handle "1 1/2 name"
-        let name = ingredient.substr(firstSeparation + 1, ingredient.length - 1).trim()
-
-        if (quantity.indexOf('½') > -1 || quantity.indexOf('¼') > -1 || quantity.indexOf('¾') > -1 || !isNaN(parseInt(quantity))) {
-          formattedIngredients.push({ quantity, name })
-        } else {
-          // Quantity is not a number so this is an ingredient without quantity - For example: a handful of peanuts
-          name = ingredient
-          formattedIngredients.push({ name })
+        while (!found && unitCount < units.length) {
+          found = units[unitCount].regex.test(ingredient)
+          unitCount++
         }
+        let ingredientObject
+        if (found) { // This ingredient matches one of the unit regexes
+          const unitEntry = units[unitCount - 1]
+          const regexForUnit = unitEntry.findUnitRegex || unitEntry.regex
+
+          const splitArray = ingredient.split(regexForUnit)
+          const quantity = splitArray[0].trim() // TODO: check it is a number
+
+          const unit = unitEntry.name
+          const name = splitArray[1].trim()
+          ingredientObject = { quantity, unit, name }
+        } else { // It does not match any of the unit regex
+          // If there is no unit, then this ingredient has the shape <Quantity Name> or just <Name>
+          const firstSeparation = ingredient.indexOf(' ')
+          const quantity = ingredient.substr(0, firstSeparation).trim() // TODO: handle "1 1/2 name"
+          let name = ingredient.substr(firstSeparation + 1, ingredient.length - 1).trim()
+
+          if (quantity.indexOf('½') > -1 || quantity.indexOf('¼') > -1 || quantity.indexOf('¾') > -1 || !isNaN(parseInt(quantity))) {
+            ingredientObject = { quantity, name }
+          } else {
+            // Quantity is not a number so this is an ingredient without quantity - For example: a handful of peanuts
+            name = ingredient
+            ingredientObject = { name }
+          }
+        }
+        if (ingredientGroup) {
+          ingredientObject.group = ingredientGroup
+        }
+        formattedIngredients.push(ingredientObject)
       }
     })
     return formattedIngredients
   },
 
   processRecipe (recipe) {
-    let ingredients = module.exports.parseIngredients(recipe.ingredients)
+    const ingredients = module.exports.parseIngredients(recipe.ingredients)
     recipe.ingredients = ingredients
 
     if (recipe.tags) {
-      let tags = recipe.tags.split(',')
+      const tags = recipe.tags.split(',')
       recipe.tags = tags.map(s => s.trim())
     }
 

@@ -14,7 +14,7 @@ const authentication = require('../../utils/authentication')
 describe('Authentication', () => {
   describe('internal', () => {
     let oauth2clientStub
-    let oauthClientInstance = {
+    const oauthClientInstance = {
       verifyIdToken: () => {},
       getTokenInfo: () => {}
     }
@@ -29,7 +29,7 @@ describe('Authentication', () => {
 
     describe('verifyToken', () => {
       let verifyIdTokenStub
-      let fakeTicket = {
+      const fakeTicket = {
         getPayload: () => {
           return {
             sub: 'testuserId'
@@ -117,23 +117,23 @@ describe('Authentication', () => {
       req = httpMocks.createRequest({})
       authentication.verify(req, res, fakeNext)
       expect(fakeNext.callCount).to.equal(1)
-      let nextArg = fakeNext.getCall(0).args[0]
+      const nextArg = fakeNext.getCall(0).args[0]
       expect(nextArg.status).to.equal(401)
       expect(nextArg.message).to.equal('Missing authorization header')
     })
 
     it('calls next with an error if the authorization header has no oauth2 bearer token', () => {
-      req = httpMocks.createRequest({ headers: { 'Authorization': 'faketoken' } })
+      req = httpMocks.createRequest({ headers: { Authorization: 'faketoken' } })
       authentication.verify(req, res, fakeNext)
       expect(fakeNext.callCount).to.equal(1)
-      let nextArg = fakeNext.getCall(0).args[0]
+      const nextArg = fakeNext.getCall(0).args[0]
       expect(nextArg.status).to.equal(401)
       expect(nextArg.message).to.equal('Missing oauth2 token in authorization header')
     })
 
     context('when the authorization header has a oauth2 token', () => {
       beforeEach(() => {
-        req = httpMocks.createRequest({ headers: { 'Authorization': 'bearer realtoken' } })
+        req = httpMocks.createRequest({ headers: { Authorization: 'bearer realtoken' } })
       })
 
       context('when verifyToken succeeds and returns a userId', () => {
@@ -142,7 +142,7 @@ describe('Authentication', () => {
 
           return authentication.verify(req, res, fakeNext).then(() => {
             expect(fakeNext.callCount).to.equal(1)
-            let nextArg = fakeNext.getCall(0).args[0]
+            const nextArg = fakeNext.getCall(0).args[0]
             expect(nextArg).to.equal(undefined)
             expect(req.userId).to.equal('verifiedUserId')
           })
@@ -160,7 +160,7 @@ describe('Authentication', () => {
 
             return authentication.verify(req, res, fakeNext).then(() => {
               expect(fakeNext.callCount).to.equal(1)
-              let nextArg = fakeNext.getCall(0).args[0]
+              const nextArg = fakeNext.getCall(0).args[0]
               expect(nextArg).to.equal(undefined)
               expect(req.userId).to.equal('tokenfrominfo')
             })
@@ -171,7 +171,7 @@ describe('Authentication', () => {
 
             return authentication.verify(req, res, fakeNext).then(() => {
               expect(fakeNext.callCount).to.equal(1)
-              let nextArg = fakeNext.getCall(0).args[0]
+              const nextArg = fakeNext.getCall(0).args[0]
               expect(nextArg.status).to.equal(401)
               expect(nextArg.message).to.equal('Failed to verify oauth2 token')
             })
@@ -184,7 +184,7 @@ describe('Authentication', () => {
 
             return authentication.verify(req, res, fakeNext).then(() => {
               expect(fakeNext.callCount).to.equal(1)
-              let nextArg = fakeNext.getCall(0).args[0]
+              const nextArg = fakeNext.getCall(0).args[0]
               expect(nextArg.status).to.equal(401)
               expect(nextArg.message).to.equal('Failed to verify oauth2 token')
             })

@@ -116,13 +116,25 @@ paths:
       - name: "url"
         in: "path"
         description: "Recipe url"
-        required: true
+        required: false
         schema:
           type: "string"
       - name: "userId"
         in: "path"
         description: "User ID"
         required: true
+        schema:
+          type: "string"
+      - name: "searchString"
+        in: "path"
+        description: "search terms"
+        required: false
+        schema:
+          type: "string"
+      - name: "skip"
+        in: "path"
+        description: "number of search results to skip"
+        required: false
         schema:
           type: "string"
       responses:

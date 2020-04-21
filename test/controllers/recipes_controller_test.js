@@ -258,6 +258,30 @@ describe('Recipes controller', () => {
           skipStub.reset()
         })
 
+        context('when no skip parameter is received', () => {
+          it('returns results using skip 0', (done) => {
+            const queryNoSkip = { userId: 'testUserId', searchString: 'ice cream' }
+            req.query = queryNoSkip
+
+            countStub.resolves(2)
+            skipStub.resolves(dbRecipes)
+
+            res.on('end', () => {
+              expect(recipeFindStub.callCount).to.equal(2)
+              expect(skipStub.callCount).to.equal(1)
+              expect(skipStub).to.have.been.calledWith(0)
+              expect(res._getStatusCode()).to.equal(200)
+              expect(res._getData()).to.deep.equal({
+                count: 2,
+                recipes: dbRecipes
+              })
+              done()
+            })
+
+            recipesController.find(req, res)
+          })
+        })
+
         context('and getting the number of search results fails', () => {
           it('returns 500 and the error', (done) => {
             req.query = query

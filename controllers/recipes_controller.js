@@ -54,7 +54,7 @@ module.exports = {
           i++
         }
         searchString += '"'
-        const skip = parseInt(req.query.skip)
+        const skip = req.query.skip ? parseInt(req.query.skip) : 0
         const results = { count: 0, recipes: [] }
         return Recipe.find({ $text: { $search: searchString }, userId: req.userId }, { score: { $meta: 'textScore' } }).countDocuments()
           .then(count => {

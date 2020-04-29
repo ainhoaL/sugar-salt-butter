@@ -54,9 +54,20 @@ module.exports = {
           i++
         }
         searchString += '"'
-        return Recipe.find({ $text: { $search: searchString }, userId: req.userId }, { score: { $meta: 'textScore' } }).sort({ score: { $meta: 'textScore' } })
+        const skip = req.query.skip ? parseInt(req.query.skip) : 0
+        const results = { count: 0, recipes: [] }
+        return Recipe.find({ $text: { $search: searchString }, userId: req.userId }, { score: { $meta: 'textScore' } }).countDocuments()
+          .then(count => {
+            results.count = count
+            if (count > 0) {
+              return Recipe.find({ $text: { $search: searchString }, userId: req.userId }, { score: { $meta: 'textScore' } }).sort({ score: { $meta: 'textScore' } }).limit(40).skip(skip)
+            } else {
+              return res.send(results)
+            }
+          })
           .then(dbRecipes => {
-            return res.send(dbRecipes)
+            results.recipes = dbRecipes
+            return res.send(results)
           })
           .catch(error => {
             return res.status(500).send(error.message) // TODO: change for custom error message

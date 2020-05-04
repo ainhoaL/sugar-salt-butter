@@ -24,7 +24,7 @@ module.exports = {
   },
 
   /**
-   * Find a recipe
+   * Find recipes
    * @param req {request object}
    * @param res {response object}
    */
@@ -37,7 +37,7 @@ module.exports = {
         return Recipe.findOne({ url: req.query.url, userId: req.userId })
           .then(dbRecipe => {
             if (dbRecipe) {
-              return res.send(dbRecipe)
+              return res.send({ count: 1, recipes: [dbRecipe] })
             } else {
               return res.sendStatus(404)
             }

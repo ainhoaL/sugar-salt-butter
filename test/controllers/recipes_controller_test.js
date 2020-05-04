@@ -131,7 +131,7 @@ describe('Recipes controller', () => {
             expect(recipeFindOneStub.callCount).to.equal(1)
             expect(recipeFindOneStub).to.have.been.calledWith(query)
             expect(res._getStatusCode()).to.equal(200)
-            expect(res._getData()).to.deep.equal(dbRecipe)
+            expect(res._getData()).to.deep.equal({ count: 1, recipes: [dbRecipe] })
             done()
           })
 

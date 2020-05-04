@@ -113,16 +113,16 @@ paths:
       produces:
       - "application/json"
       parameters:
-      - name: "url"
-        in: "path"
-        description: "Recipe url"
-        required: false
-        schema:
-          type: "string"
       - name: "userId"
         in: "path"
         description: "User ID"
         required: true
+        schema:
+          type: "string"
+      - name: "url"
+        in: "path"
+        description: "Recipe url"
+        required: false
         schema:
           type: "string"
       - name: "searchString"
@@ -139,11 +139,11 @@ paths:
           type: "string"
       responses:
         200:
-          description: "Recipe found"
+          description: "Recipes found"
           content:
             application/json:
               schema:
-                $ref: '#/definitions/Recipe'
+                $ref: '#/definitions/RecipeSearchResults'
         404:
           description: "Not Found"
         401:
@@ -264,3 +264,19 @@ definitions:
       fat:
         type: "number"
         example: 12
+  RecipeSearchResults:
+    type: "object"
+    required:
+    - "count"
+    - "recipes"
+    properties:
+      count:
+        type: "integer"
+        example: 100
+      recipes:
+        type: "array"
+        xml:
+          name: "recipes"
+          wrapped: true
+        items:
+          $ref: "#/definitions/Recipe"

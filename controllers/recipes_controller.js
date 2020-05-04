@@ -37,8 +37,7 @@ module.exports = {
         return Recipe.findOne({ url: req.query.url, userId: req.userId })
           .then(dbRecipe => {
             if (dbRecipe) {
-              const results = { count: 1, recipes: [dbRecipe] }
-              return res.send(results)
+              return res.send({ count: 1, recipes: [dbRecipe] })
             } else {
               return res.sendStatus(404)
             }

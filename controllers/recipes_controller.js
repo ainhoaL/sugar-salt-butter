@@ -1,4 +1,5 @@
 const Recipe = require('../models/recipe')
+const math = require('mathjs')
 
 module.exports = {
 
@@ -145,6 +146,7 @@ module.exports = {
   parseIngredients (ingredientsText) {
     // separate each ingredient in quantity, unit and name.
     // To find the unit type, using an array of possible units regexes to look for in the ingredients
+    // TODO: add pound (lb) to units to look for / add cm to units / balsamic vinegar gets parsed into c (cups) vinegar ?? large cloves garlic also into c (cups)
     const units = [
       { name: 'cup', regex: /cup[s]?/ },
       { name: 'cup', regex: /[cC][s]?[.]?\s/ },
@@ -175,7 +177,7 @@ module.exports = {
       if (ingredient.indexOf('#') > -1) {
         const ingredientHeader = ingredient.split('#')
         ingredientGroup = ingredientHeader[1].trim()
-      } else {
+      } else if (ingredient) {
         let unitCount = 0
         let found = false
 
@@ -189,21 +191,32 @@ module.exports = {
           const regexForUnit = unitEntry.findUnitRegex || unitEntry.regex
 
           const splitArray = ingredient.split(regexForUnit)
-          const quantity = splitArray[0].trim() // TODO: check it is a number
+          const quantity = splitArray[0].trim()
+
+          let numberQuantity
+          try {
+            numberQuantity = module.exports.parseQuantity(quantity)
+          } catch (error) {
+            console.log(error)
+            throw new Error('Failed to parse quantity for ingredient: ' + ingredient)
+          }
 
           const unit = unitEntry.name
           const name = splitArray[1].trim()
-          ingredientObject = { quantity, unit, name }
+          ingredientObject = { quantity: numberQuantity, unit, name }
         } else { // It does not match any of the unit regex
           // If there is no unit, then this ingredient has the shape <Quantity Name> or just <Name>
           const firstSeparation = ingredient.indexOf(' ')
           const quantity = ingredient.substr(0, firstSeparation).trim() // TODO: handle "1 1/2 name"
           let name = ingredient.substr(firstSeparation + 1, ingredient.length - 1).trim()
 
-          if (quantity.indexOf('½') > -1 || quantity.indexOf('¼') > -1 || quantity.indexOf('¾') > -1 || !isNaN(parseInt(quantity))) {
-            ingredientObject = { quantity, name }
-          } else {
-            // Quantity is not a number so this is an ingredient without quantity - For example: a handful of peanuts
+          let numberQuantity
+          try {
+            numberQuantity = module.exports.parseQuantity(quantity)
+            ingredientObject = { quantity: numberQuantity, name }
+          } catch (error) {
+            console.log(error)
+            console.log('Failed to parse quantity for ingredient: ' + ingredient + ' - it probably does not have a quantity? - storing without quantity')
             name = ingredient
             ingredientObject = { name }
           }
@@ -215,6 +228,56 @@ module.exports = {
       }
     })
     return formattedIngredients
+  },
+
+  /**
+   * Parses a string ingredient quantity into a number quantity
+   * @param currentQty {string} - current ingredient quantity
+   * @returns {number} - ingredient quantity parsed to a number (up to 3 decimals)
+   */
+  parseQuantity (currentQty) {
+    let newQty
+    let index
+    let firstNumber
+    let secondNumber = 0
+    if (currentQty.indexOf('½') > -1) {
+      index = currentQty.indexOf('½')
+      secondNumber = 0.5
+    } else if (currentQty.indexOf('¼') > -1) {
+      index = currentQty.indexOf('¼')
+      secondNumber = 0.25
+    } else if (currentQty.indexOf('¾') > -1) {
+      index = currentQty.indexOf('¾')
+      secondNumber = 0.75
+    } else if (currentQty.indexOf('⅔') > -1) {
+      index = currentQty.indexOf('⅔')
+      secondNumber = 0.666
+    } else if (currentQty.indexOf('⅓') > -1) {
+      index = currentQty.indexOf('⅓')
+      secondNumber = 0.333
+    } else if (currentQty.indexOf('⅛') > -1) {
+      index = currentQty.indexOf('⅛')
+      secondNumber = 0.125
+    }
+
+    if (index > -1) {
+      firstNumber = index > 0 ? parseFloat(currentQty.substr(0, index).trim()) : 0
+      newQty = firstNumber + secondNumber
+    } else if (currentQty.indexOf('-') > -1 || currentQty.indexOf('–') > -1) {
+      throw new Error('Quantity is a range, not accepted')
+    } else {
+      try {
+        newQty = math.round(math.number(math.fraction(currentQty)) * 1000) / 1000
+      } catch (error) {
+        throw new Error('Quantity ' + currentQty + ' is not a valid number')
+      }
+    }
+
+    if (isNaN(newQty)) {
+      throw new Error('NAN ----- Quantity ' + currentQty + ' is not a valid number')
+    }
+
+    return newQty
   },
 
   processRecipe (recipe) {

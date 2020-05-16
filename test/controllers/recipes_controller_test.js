@@ -605,7 +605,7 @@ describe('Recipes controller', () => {
   describe('parseIngredients', () => {
     describe('when the recipe has only one type of unit:', () => {
       describe('grams', () => {
-        const expectedIngredients = [{ quantity: '10', unit: 'g', name: 'butter' }, { quantity: '1', unit: 'g', name: 'salt' }, { quantity: '1/2', unit: 'g', name: 'pepper' }, { quantity: '1 3/4', unit: 'g', name: 'flour' }, { quantity: '20.5', unit: 'g', name: 'sugar' }]
+        const expectedIngredients = [{ quantity: 10, unit: 'g', name: 'butter' }, { quantity: 1, unit: 'g', name: 'salt' }, { quantity: 0.5, unit: 'g', name: 'pepper' }, { quantity: 1.75, unit: 'g', name: 'flour' }, { quantity: 20.5, unit: 'g', name: 'sugar' }]
 
         it('returns the correct parsed ingredients when it is formatted "Qty grams Ingredient"', () => {
           const recipe = '10 grams butter\n1 gram salt\n1/2 gram pepper\n1 3/4 gram flour\n20.5 grams sugar'
@@ -657,7 +657,7 @@ describe('Recipes controller', () => {
       })
 
       describe('cups', () => {
-        const expectedIngredients = [{ quantity: '10', unit: 'cup', name: 'butter' }, { quantity: '1', unit: 'cup', name: 'salt' }, { quantity: '1/2', unit: 'cup', name: 'pepper' }, { quantity: '1 3/4', unit: 'cup', name: 'flour' }, { quantity: '20.5', unit: 'cup', name: 'sugar' }]
+        const expectedIngredients = [{ quantity: 10, unit: 'cup', name: 'butter' }, { quantity: 1, unit: 'cup', name: 'salt' }, { quantity: 0.5, unit: 'cup', name: 'pepper' }, { quantity: 1.75, unit: 'cup', name: 'flour' }, { quantity: 20.5, unit: 'cup', name: 'sugar' }]
 
         it('returns the correct parsed ingredients when it is formatted "Qty cups Ingredient"', () => {
           const recipe = '10 cups butter\n1 cup salt\n1/2 cup pepper\n1 3/4 cups flour\n20.5 cups sugar'
@@ -701,7 +701,7 @@ describe('Recipes controller', () => {
       })
 
       describe('tbsp', () => {
-        const expectedIngredients = [{ quantity: '10', unit: 'tbsp', name: 'butter' }, { quantity: '1', unit: 'tbsp', name: 'salt' }, { quantity: '1/2', unit: 'tbsp', name: 'pepper' }, { quantity: '1 3/4', unit: 'tbsp', name: 'flour' }, { quantity: '20.5', unit: 'tbsp', name: 'sugar' }]
+        const expectedIngredients = [{ quantity: 10, unit: 'tbsp', name: 'butter' }, { quantity: 1, unit: 'tbsp', name: 'salt' }, { quantity: 0.5, unit: 'tbsp', name: 'pepper' }, { quantity: 1.75, unit: 'tbsp', name: 'flour' }, { quantity: 20.5, unit: 'tbsp', name: 'sugar' }]
 
         it('returns the correct parsed ingredients when it is formatted "Qty tbsp Ingredient"', () => {
           const recipe = '10 tbsps butter\n1 tbsp salt\n1/2 tbsp pepper\n1 3/4 tbsp flour\n20.5 tbsp sugar'
@@ -761,7 +761,7 @@ describe('Recipes controller', () => {
       })
 
       describe('tsp', () => {
-        const expectedIngredients = [{ quantity: '10', unit: 'tsp', name: 'butter' }, { quantity: '1', unit: 'tsp', name: 'salt' }, { quantity: '1/2', unit: 'tsp', name: 'pepper' }, { quantity: '1 3/4', unit: 'tsp', name: 'flour' }, { quantity: '20.5', unit: 'tsp', name: 'sugar' }]
+        const expectedIngredients = [{ quantity: 10, unit: 'tsp', name: 'butter' }, { quantity: 1, unit: 'tsp', name: 'salt' }, { quantity: 0.5, unit: 'tsp', name: 'pepper' }, { quantity: 1.75, unit: 'tsp', name: 'flour' }, { quantity: 20.5, unit: 'tsp', name: 'sugar' }]
 
         it('returns the correct parsed ingredients when it is formatted "Qty tsp Ingredient"', () => {
           const recipe = '10 tsps butter\n1 tsp salt\n1/2 tsp pepper\n1 3/4 tsp flour\n20.5 tsps sugar'
@@ -805,7 +805,7 @@ describe('Recipes controller', () => {
       })
 
       describe('ml', () => {
-        const expectedIngredients = [{ quantity: '10', unit: 'ml', name: 'butter' }, { quantity: '1', unit: 'ml', name: 'salt' }, { quantity: '1/2', unit: 'ml', name: 'pepper' }, { quantity: '1 3/4', unit: 'ml', name: 'flour' }, { quantity: '20.5', unit: 'ml', name: 'sugar' }]
+        const expectedIngredients = [{ quantity: 10, unit: 'ml', name: 'butter' }, { quantity: 1, unit: 'ml', name: 'salt' }, { quantity: 0.5, unit: 'ml', name: 'pepper' }, { quantity: 1.75, unit: 'ml', name: 'flour' }, { quantity: 20.5, unit: 'ml', name: 'sugar' }]
 
         it('returns the correct parsed ingredients when it is formatted "Qty ml Ingredient"', () => {
           const recipe = '10 ml butter\n1 ml salt\n1/2 ml pepper\n1 3/4 ml flour\n20.5 mls sugar'
@@ -849,7 +849,7 @@ describe('Recipes controller', () => {
       })
 
       describe('ounce', () => {
-        const expectedIngredients = [{ quantity: '10', unit: 'oz', name: 'butter' }, { quantity: '1', unit: 'oz', name: 'salt' }, { quantity: '1/2', unit: 'oz', name: 'pepper' }, { quantity: '1 3/4', unit: 'oz', name: 'flour' }, { quantity: '20.5', unit: 'oz', name: 'sugar' }]
+        const expectedIngredients = [{ quantity: 10, unit: 'oz', name: 'butter' }, { quantity: 1, unit: 'oz', name: 'salt' }, { quantity: 0.5, unit: 'oz', name: 'pepper' }, { quantity: 1.75, unit: 'oz', name: 'flour' }, { quantity: 20.5, unit: 'oz', name: 'sugar' }]
 
         it('returns the correct parsed ingredients when it is formatted "Qty oz Ingredient"', () => {
           const recipe = '10 oz butter\n1 oz salt\n1/2 oz pepper\n1 3/4 oz flour\n20.5 ozs sugar'
@@ -885,7 +885,7 @@ describe('Recipes controller', () => {
       })
 
       describe('liter', () => {
-        const expectedIngredients = [{ quantity: '10', unit: 'l', name: 'butter' }, { quantity: '1', unit: 'l', name: 'salt' }, { quantity: '1/2', unit: 'l', name: 'pepper' }, { quantity: '1 3/4', unit: 'l', name: 'flour' }, { quantity: '20.5', unit: 'l', name: 'sugar' }]
+        const expectedIngredients = [{ quantity: 10, unit: 'l', name: 'butter' }, { quantity: 1, unit: 'l', name: 'salt' }, { quantity: 0.5, unit: 'l', name: 'pepper' }, { quantity: 1.75, unit: 'l', name: 'flour' }, { quantity: 20.5, unit: 'l', name: 'sugar' }]
 
         it('returns the correct parsed ingredients when it is formatted "Qty l Ingredient"', () => {
           const recipe = '10 l butter\n1 l salt\n1/2 l pepper\n1 3/4 l flour\n20.5 ls sugar'
@@ -921,7 +921,7 @@ describe('Recipes controller', () => {
       })
 
       describe('kg', () => {
-        const expectedIngredients = [{ quantity: '10', unit: 'kg', name: 'butter' }, { quantity: '1', unit: 'kg', name: 'salt' }, { quantity: '1/2', unit: 'kg', name: 'pepper' }, { quantity: '1 3/4', unit: 'kg', name: 'flour' }, { quantity: '20.5', unit: 'kg', name: 'sugar' }]
+        const expectedIngredients = [{ quantity: 10, unit: 'kg', name: 'butter' }, { quantity: 1, unit: 'kg', name: 'salt' }, { quantity: 0.5, unit: 'kg', name: 'pepper' }, { quantity: 1.75, unit: 'kg', name: 'flour' }, { quantity: 20.5, unit: 'kg', name: 'sugar' }]
 
         it('returns the correct parsed ingredients when it is formatted "Qty kg Ingredient"', () => {
           const recipe = '10 kgs butter\n1 kg salt\n1/2 kg pepper\n1 3/4 kg flour\n20.5 kgs sugar'
@@ -958,7 +958,7 @@ describe('Recipes controller', () => {
     })
 
     describe('when the recipe has ingredients without unit', () => {
-      const expectedIngredients = [{ quantity: '10', name: 'almonds' }, { quantity: '2', name: 'sprigs of thyme' }]
+      const expectedIngredients = [{ quantity: 10, name: 'almonds' }, { quantity: 2, name: 'sprigs of thyme' }]
 
       it('returns the correct parsed ingredients when it is formatted "Qty Ingredient"', () => {
         const recipe = '10 almonds\n2 sprigs of thyme'
@@ -983,11 +983,11 @@ describe('Recipes controller', () => {
 
     describe('when the recipe has ingredient groupings', () => {
       const expectedIngredients = [
-        { quantity: '100', unit: 'g', name: 'almonds' },
-        { quantity: '2', name: 'sprigs of thyme' },
-        { quantity: '2', unit: 'cup', name: 'sugar', group: 'glaze' },
-        { quantity: '4', unit: 'tbsp', name: 'butter', group: 'glaze' },
-        { quantity: '1', name: 'chocolate bar', group: 'decoration' }
+        { quantity: 100, unit: 'g', name: 'almonds' },
+        { quantity: 2, name: 'sprigs of thyme' },
+        { quantity: 2, unit: 'cup', name: 'sugar', group: 'glaze' },
+        { quantity: 4, unit: 'tbsp', name: 'butter', group: 'glaze' },
+        { quantity: 1, name: 'chocolate bar', group: 'decoration' }
       ]
 
       it('returns the correct parsed ingredients', () => {
@@ -996,6 +996,144 @@ describe('Recipes controller', () => {
         const parsedIngredients = recipesController.parseIngredients(recipe)
         expect(parsedIngredients.length).to.equal(5)
         expect(parsedIngredients).to.deep.equal(expectedIngredients)
+      })
+    })
+
+    describe('when the recipe has an ingredient with a quantity that cannot be parsed', () => {
+      it('throws an exception', () => {
+        const recipe = '10 grams butter\n1 gram salt\nhalf gram pepper\n1 3/4 gram flour\n20.5 grams sugar'
+        expect(recipesController.parseIngredients.bind(null, recipe)).to.throw('Failed to parse quantity for ingredient: half gram pepper')
+      })
+    })
+  })
+
+  describe('parseQuantity', () => {
+    describe('when the quantity only has one number', () => {
+      it('returns 0.25 if quantity is ¼', () => {
+        const parsedQty = recipesController.parseQuantity('¼')
+        expect(parsedQty).to.equal(0.25)
+      })
+      it('returns 0.5 if quantity is ½', () => {
+        const parsedQty = recipesController.parseQuantity('½')
+        expect(parsedQty).to.equal(0.5)
+      })
+      it('returns 0.75 if quantity is ¾', () => {
+        const parsedQty = recipesController.parseQuantity('¾')
+        expect(parsedQty).to.equal(0.75)
+      })
+      it('returns 0.667 if quantity is ⅔', () => {
+        const parsedQty = recipesController.parseQuantity('⅔')
+        expect(parsedQty).to.equal(0.666)
+      })
+      it('returns 0.333 if quantity is ⅓', () => {
+        const parsedQty = recipesController.parseQuantity('⅓')
+        expect(parsedQty).to.equal(0.333)
+      })
+      it('returns 0.125 if quantity is ⅛', () => {
+        const parsedQty = recipesController.parseQuantity('⅛')
+        expect(parsedQty).to.equal(0.125)
+      })
+      it('returns 0.125 if quantity is 1/8', () => {
+        const parsedQty = recipesController.parseQuantity('1/8')
+        expect(parsedQty).to.equal(0.125)
+      })
+      it('returns 0.25 if quantity is 1/4', () => {
+        const parsedQty = recipesController.parseQuantity('1/4')
+        expect(parsedQty).to.equal(0.25)
+      })
+      it('returns 0.5 if quantity is 1/2', () => {
+        const parsedQty = recipesController.parseQuantity('1/2')
+        expect(parsedQty).to.equal(0.5)
+      })
+      it('returns 0.75 if quantity is 3/4', () => {
+        const parsedQty = recipesController.parseQuantity('3/4')
+        expect(parsedQty).to.equal(0.75)
+      })
+      it('returns 0.667 if quantity is 2/3', () => {
+        const parsedQty = recipesController.parseQuantity('2/3')
+        expect(parsedQty).to.equal(0.667)
+      })
+      it('returns 0.333 if quantity is 1/3', () => {
+        const parsedQty = recipesController.parseQuantity('1/3')
+        expect(parsedQty).to.equal(0.333)
+      })
+      it('returns 0.125 if quantity is 1/8', () => {
+        const parsedQty = recipesController.parseQuantity('1/8')
+        expect(parsedQty).to.equal(0.125)
+      })
+      it('returns 0.23 if quantity is 0.23', () => {
+        const parsedQty = recipesController.parseQuantity('0.23')
+        expect(parsedQty).to.equal(0.23)
+      })
+      it('returns 5.5 if quantity is 5.5', () => {
+        const parsedQty = recipesController.parseQuantity('5.5')
+        expect(parsedQty).to.equal(5.5)
+      })
+      it('returns 100 if quantity is 100', () => {
+        const parsedQty = recipesController.parseQuantity('100')
+        expect(parsedQty).to.equal(100)
+      })
+    })
+    describe('when the quantity only has two numbers', () => {
+      it('returns 1.25 if quantity is 1 ¼', () => {
+        const parsedQty = recipesController.parseQuantity('1 ¼')
+        expect(parsedQty).to.equal(1.25)
+      })
+      it('returns 2.5 if quantity is 2½', () => {
+        const parsedQty = recipesController.parseQuantity('2½')
+        expect(parsedQty).to.equal(2.5)
+      })
+      it('returns 3.75 if quantity is 3 ¾', () => {
+        const parsedQty = recipesController.parseQuantity('3 ¾')
+        expect(parsedQty).to.equal(3.75)
+      })
+      it('returns 4.667 if quantity is 4⅔', () => {
+        const parsedQty = recipesController.parseQuantity('4⅔')
+        expect(parsedQty).to.equal(4.666)
+      })
+      it('returns 5.333 if quantity is 5 ⅓', () => {
+        const parsedQty = recipesController.parseQuantity('5 ⅓')
+        expect(parsedQty).to.equal(5.333)
+      })
+      it('returns 10.125 if quantity is 10⅛', () => {
+        const parsedQty = recipesController.parseQuantity('10⅛')
+        expect(parsedQty).to.equal(10.125)
+      })
+      it('returns 6.125 if quantity is 6 1/8', () => {
+        const parsedQty = recipesController.parseQuantity('6 1/8')
+        expect(parsedQty).to.equal(6.125)
+      })
+      it('returns 7.25 if quantity is 7 1/4', () => {
+        const parsedQty = recipesController.parseQuantity('7 1/4')
+        expect(parsedQty).to.equal(7.25)
+      })
+      it('returns 8.5 if quantity is 8 1/2', () => {
+        const parsedQty = recipesController.parseQuantity('8 1/2')
+        expect(parsedQty).to.equal(8.5)
+      })
+      it('returns 9.75 if quantity is 9 3/4', () => {
+        const parsedQty = recipesController.parseQuantity('9 3/4')
+        expect(parsedQty).to.equal(9.75)
+      })
+      it('returns 10.667 if quantity is 10 2/3', () => {
+        const parsedQty = recipesController.parseQuantity('10 2/3')
+        expect(parsedQty).to.equal(10.667)
+      })
+      it('returns 11.333 if quantity is 11 1/3', () => {
+        const parsedQty = recipesController.parseQuantity('11 1/3')
+        expect(parsedQty).to.equal(11.333)
+      })
+      it('returns 12.125 if quantity is 12 1/8', () => {
+        const parsedQty = recipesController.parseQuantity('12 1/8')
+        expect(parsedQty).to.equal(12.125)
+      })
+    })
+    describe('when the quantity is not valid', () => {
+      it('throws error if quantity is not a number', () => {
+        expect(recipesController.parseQuantity.bind(null, 'two')).to.throw('Quantity is not a valid number')
+      })
+      it('throws error if quantity is a range', () => {
+        expect(recipesController.parseQuantity.bind(null, '3-4')).to.throw('Quantity is a range, not accepted')
       })
     })
   })
@@ -1012,7 +1150,7 @@ describe('Recipes controller', () => {
       const processedRecipe = {
         userId: 'user1',
         title: 'beef pie',
-        ingredients: [{ quantity: '1', name: 'onion' }, { quantity: '500', unit: 'g', name: 'minced beef' }],
+        ingredients: [{ quantity: 1, name: 'onion' }, { quantity: 500, unit: 'g', name: 'minced beef' }],
         tags: ['dinner', 'tasty', 'good', 'with space']
       }
 
@@ -1032,7 +1170,7 @@ describe('Recipes controller', () => {
       const processedRecipe = {
         userId: 'user1',
         title: 'beef pie',
-        ingredients: [{ quantity: '1', name: 'onion' }, { quantity: '500', unit: 'g', name: 'minced beef' }]
+        ingredients: [{ quantity: 1, name: 'onion' }, { quantity: 500, unit: 'g', name: 'minced beef' }]
       }
 
       it('returns a processed recipe without tags', () => {

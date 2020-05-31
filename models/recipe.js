@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
+const parsing = require('../utils/parsing')
 
 const RecipeIngredientSchema = new Schema({
   quantity: {
@@ -15,6 +16,19 @@ const RecipeIngredientSchema = new Schema({
   group: {
     type: String
   }
+})
+
+/* istanbul ignore next */
+RecipeIngredientSchema.virtual('displayQuantity').get(function () {
+  if (this.unit === 'cup' || this.unit === 'tbsp' || this.unit === 'tsp') {
+    return parsing.numberToFraction(this.quantity)
+  } else {
+    return this.quantity
+  }
+})
+
+RecipeIngredientSchema.set('toJSON', {
+  virtuals: true
 })
 
 const RecipeSchema = new Schema({
@@ -56,6 +70,10 @@ const RecipeSchema = new Schema({
     type: Boolean,
     default: false
   },
+  done: {
+    type: Boolean,
+    default: false
+  },
   servings: {
     type: Number
   },
@@ -74,13 +92,13 @@ const RecipeSchema = new Schema({
   storage: {
     type: String
   },
-  freezes: {
+  freezable: {
     type: Boolean
   },
   equipment: {
     type: String
   },
-  macros: {
+  nutrition: {
     type: { carbs: Number, protein: Number, fat: Number, calories: Number }
   }
 })

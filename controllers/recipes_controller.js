@@ -1,5 +1,5 @@
 const Recipe = require('../models/recipe')
-const math = require('mathjs')
+const parsing = require('../utils/parsing')
 
 module.exports = {
 
@@ -140,23 +140,17 @@ module.exports = {
   /**
    * Given a multiline string with a list of ingredients it returns a standardized array of ingredients
    * It standardizes the ingredients units so all ingredients are always stored with same units for easier conversion later on
+   * It also groups ingredients by sections. A group name starts with #. Any ingredient after it will belong to that group
    * @param ingredientsText {string} - a multiline string with 1 ingredient per line
    * @returns {Array} - array of ingredient objects { quantity (string), unit (string), name (string) }
    */
   parseIngredients (ingredientsText) {
     // separate each ingredient in quantity, unit and name.
     // To find the unit type, using an array of possible units regexes to look for in the ingredients
-    // TODO: add pound (lb) to units to look for / add cm to units / balsamic vinegar gets parsed into c (cups) vinegar ?? large cloves garlic also into c (cups)
+    // TODO: add cm to units
     const units = [
       { name: 'cup', regex: /cup[s]?/ },
-      { name: 'cup', regex: /[cC][s]?[.]?\s/ },
-      { name: 'tsp', regex: /tsp[s]?[.]?/ },
-      { name: 'tsp', regex: /teaspoon[s]?/ },
-      { name: 'tsp', regex: /([0-9]|[\xbc\xbd\xbe])+\s?t[s]?\s/, findUnitRegex: /t[s]?\s/ },
-      { name: 'tbsp', regex: /[Tt]bsp[s]?[.]?/ },
-      { name: 'tbsp', regex: /([0-9]|[\xbc\xbd\xbe])+\s?T[B]?[s]?[.]?\s/, findUnitRegex: /T[B]?[s]?[.]?\s/ },
-      { name: 'tbsp', regex: /[Tt]bl?[s]?[.]?\s/ },
-      { name: 'tbsp', regex: /tablespoon[s]*[.]*/ },
+      { name: 'cup', regex: /([0-9]|[\xbc\xbd\xbe])+\s?[cC][s]?[.]?\s/, findUnitRegex: /[cC][s]?[.]?\s/ },
       { name: 'kg', regex: /[Kk]g[s]?[.]?\s/ },
       { name: 'kg', regex: /kilogram[s]?/ },
       { name: 'kg', regex: /kilo[s]?/ },
@@ -164,16 +158,26 @@ module.exports = {
       { name: 'g', regex: /gram[s]?/ },
       { name: 'ml', regex: /m[Ll][s]?[.]?/ },
       { name: 'ml', regex: /milliliter[s]?/ },
-      { name: 'ml', regex: /mil[s]?[.]?/ },
-      { name: 'oz', regex: /oz[s]?[.]?/ },
+      { name: 'ml', regex: /mil[s]?[.]?\s/ },
+      { name: 'oz', regex: /([0-9]|[\xbc\xbd\xbe])+\s?oz[s]?[.]?\s/, findUnitRegex: /oz[s]?[.]?\s/ },
       { name: 'oz', regex: /ounce[s]?[.]?/ },
+      { name: 'lb', regex: /[Ll]b[s]?[.]?\s/ },
+      { name: 'lb', regex: /pound[s]?/ },
       { name: 'l', regex: /([0-9]|[\xbc\xbd\xbe])+\s?[Ll][s]?[.]?\s/, findUnitRegex: /[Ll][s]?[.]?\s/ },
-      { name: 'l', regex: /liter[s]?/ }]
+      { name: 'l', regex: /liter[s]?/ },
+      { name: 'tsp', regex: /tsp[s]?[.]?/ },
+      { name: 'tsp', regex: /teaspoon[s]?/ },
+      { name: 'tsp', regex: /([0-9]|[\xbc\xbd\xbe])+\s?t[s]?\s/, findUnitRegex: /t[s]?\s/ },
+      { name: 'tbsp', regex: /[Tt]bsp[s]?[.]?/ },
+      { name: 'tbsp', regex: /([0-9]|[\xbc\xbd\xbe])+\s?T[B]?[s]?[.]?\s/, findUnitRegex: /T[B]?[s]?[.]?\s/ },
+      { name: 'tbsp', regex: /[Tt]bl?[s]?[.]?\s/ },
+      { name: 'tbsp', regex: /tablespoon[s]*[.]*/ }]
 
     const formattedIngredients = []
     const ingredientsArray = ingredientsText.split(/\r?\n/) // Split by lines
     let ingredientGroup
     ingredientsArray.forEach((ingredient) => {
+      ingredient = ingredient.trim()
       if (ingredient.indexOf('#') > -1) {
         const ingredientHeader = ingredient.split('#')
         ingredientGroup = ingredientHeader[1].trim()
@@ -181,6 +185,7 @@ module.exports = {
         let unitCount = 0
         let found = false
 
+        ingredient = ingredient.trim() // Get rid of any spaces before/after ingredient
         while (!found && unitCount < units.length) {
           found = units[unitCount].regex.test(ingredient)
           unitCount++
@@ -190,19 +195,22 @@ module.exports = {
           const unitEntry = units[unitCount - 1]
           const regexForUnit = unitEntry.findUnitRegex || unitEntry.regex
 
-          const splitArray = ingredient.split(regexForUnit)
-          const quantity = splitArray[0].trim()
+          const regexResults = regexForUnit.exec(ingredient)
+          const startIndex = regexResults.index
+          const matchString = regexResults[0]
+
+          const quantity = ingredient.substr(0, startIndex).trim()
+          const name = ingredient.substr(startIndex + matchString.length, ingredient.length - 1).trim()
+          const unit = unitEntry.name
 
           let numberQuantity
           try {
-            numberQuantity = module.exports.parseQuantity(quantity)
+            numberQuantity = parsing.stringToNumber(quantity)
           } catch (error) {
             console.log(error)
             throw new Error('Failed to parse quantity for ingredient: ' + ingredient)
           }
 
-          const unit = unitEntry.name
-          const name = splitArray[1].trim()
           ingredientObject = { quantity: numberQuantity, unit, name }
         } else { // It does not match any of the unit regex
           // If there is no unit, then this ingredient has the shape <Quantity Name> or just <Name>
@@ -212,7 +220,7 @@ module.exports = {
 
           let numberQuantity
           try {
-            numberQuantity = module.exports.parseQuantity(quantity)
+            numberQuantity = parsing.stringToNumber(quantity)
             ingredientObject = { quantity: numberQuantity, name }
           } catch (error) {
             console.log(error)
@@ -228,56 +236,6 @@ module.exports = {
       }
     })
     return formattedIngredients
-  },
-
-  /**
-   * Parses a string ingredient quantity into a number quantity
-   * @param currentQty {string} - current ingredient quantity
-   * @returns {number} - ingredient quantity parsed to a number (up to 3 decimals)
-   */
-  parseQuantity (currentQty) {
-    let newQty
-    let index
-    let firstNumber
-    let secondNumber = 0
-    if (currentQty.indexOf('½') > -1) {
-      index = currentQty.indexOf('½')
-      secondNumber = 0.5
-    } else if (currentQty.indexOf('¼') > -1) {
-      index = currentQty.indexOf('¼')
-      secondNumber = 0.25
-    } else if (currentQty.indexOf('¾') > -1) {
-      index = currentQty.indexOf('¾')
-      secondNumber = 0.75
-    } else if (currentQty.indexOf('⅔') > -1) {
-      index = currentQty.indexOf('⅔')
-      secondNumber = 0.666
-    } else if (currentQty.indexOf('⅓') > -1) {
-      index = currentQty.indexOf('⅓')
-      secondNumber = 0.333
-    } else if (currentQty.indexOf('⅛') > -1) {
-      index = currentQty.indexOf('⅛')
-      secondNumber = 0.125
-    }
-
-    if (index > -1) {
-      firstNumber = index > 0 ? parseFloat(currentQty.substr(0, index).trim()) : 0
-      newQty = firstNumber + secondNumber
-    } else if (currentQty.indexOf('-') > -1 || currentQty.indexOf('–') > -1) {
-      throw new Error('Quantity is a range, not accepted')
-    } else {
-      try {
-        newQty = math.round(math.number(math.fraction(currentQty)) * 1000) / 1000
-      } catch (error) {
-        throw new Error('Quantity ' + currentQty + ' is not a valid number')
-      }
-    }
-
-    if (isNaN(newQty)) {
-      throw new Error('NAN ----- Quantity ' + currentQty + ' is not a valid number')
-    }
-
-    return newQty
   },
 
   processRecipe (recipe) {

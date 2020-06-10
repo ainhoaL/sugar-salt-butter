@@ -34,8 +34,14 @@ paths:
       responses:
         200:
           description: "OK - Recipe created"
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/Recipe'
         401:
           description: "Unauthorized"
+        500:
+          description: "Internal Server Error"
   /recipes/{id}:
     get:
       tags:
@@ -53,15 +59,9 @@ paths:
         description: "Recipe ID"
         required: true
         type: string
-      - in: "body"
-        name: "body"
-        description: "Recipe object that needs to be added to the collection"
-        required: true
-        schema:
-          $ref: "#/definitions/Recipe"
       responses:
-        204:
-          description: "OK - Recipe updated"
+        200:
+          description: "OK"
         400:
           description: "Bad Request - missing recipe ID"
         401:
@@ -86,13 +86,15 @@ paths:
         description: "Recipe ID"
         required: true
         type: string
+      - in: "body"
+        name: "body"
+        description: "Recipe object to update"
+        required: true
+        schema:
+          $ref: "#/definitions/Recipe"
       responses:
-        200:
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                $ref: '#/definitions/Recipe'
+        204:
+          description: "OK - Recipe updated"
         400:
           description: "Bad Request - missing recipe ID or body"
         401:
@@ -151,7 +153,109 @@ paths:
         500:
           description: "Internal Server Error"
         501:
-          description: "Not Implemented"  
+          description: "Not Implemented"
+  /lists:
+    post:
+      tags:
+      - "lists"
+      summary: "Add a new list to the collection"
+      description: ""
+      operationId: "addList"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "userId"
+        in: "body"
+        description: "User ID"
+        required: true
+        schema:
+          type: "string"
+      - in: "body"
+        name: "body"
+        description: "List object to create"
+        required: true
+        schema:
+          $ref: "#/definitions/Recipe"
+      responses:
+        200:
+          description: "OK - List created"
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/List'
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Recipe Not Found"
+        500:
+          description: "Internal Server Error"
+  /lists/{id}:
+    get:
+      tags:
+      - "lists"
+      summary: "Returns a list by ID"
+      description: ""
+      operationId: "get"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "List ID"
+        required: true
+        type: string
+      responses:
+        200:
+          description: "OK"
+        400:
+          description: "Bad Request - missing list ID"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        500:
+          description: "Internal Server Error"
+    put:
+      tags:
+      - "lists"
+      summary: "Updates a list by ID"
+      description: ""
+      operationId: "put"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "Recipe ID"
+        required: true
+        type: string
+      - in: "body"
+        name: "body"
+        description: "List object to update"
+        required: true
+        schema:
+          $ref: "#/definitions/List"
+      responses:
+        204:
+          description: "OK - List updated"
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/List'
+        400:
+          description: "Bad Request - missing recipe ID or body"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Recipe Not Found"
+        500:
+          description: "Internal Server Error"
 ################################################################################
 #                                 Definitions                                  #
 ################################################################################
@@ -159,8 +263,8 @@ definitions:
   Recipe:
     type: "object"
     required:
-    - "userId"
     - "title"
+    - "ingredients"
     properties:
       userId:
         type: "string"
@@ -236,8 +340,6 @@ definitions:
   Ingredient:
     type: "object"
     required:
-    - "quantity"
-    - "unit"
     - "name"
     properties:
       quantity:
@@ -249,6 +351,9 @@ definitions:
       name:
         type: "string"
         example: "flour"
+      group:
+        type: "string"
+        example: "sponge ingredients"
   NutritionalInfo:
     type: "object"
     properties:
@@ -280,3 +385,36 @@ definitions:
           wrapped: true
         items:
           $ref: "#/definitions/Recipe"
+  List:
+    type: "object"
+    required:
+    - "title"
+    properties:
+      userId:
+        type: "string"
+      title:
+        type: "string"
+        example: "choc chip cookies"
+      recipeId:
+        type: "string"
+      items:
+        type: "array"
+        xml:
+          name: "items"
+          wrapped: true
+        items:
+          $ref: "#/definitions/ListItem"
+  ListItem:
+    type: "object"
+    required:
+    - "name"
+    properties:
+      quantity:
+        type: "string"
+        example: "150"
+      unit:
+        type: "string"
+        example: "g"
+      name:
+        type: "string"
+        example: "flour"

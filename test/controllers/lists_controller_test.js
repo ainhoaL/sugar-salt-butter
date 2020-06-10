@@ -72,7 +72,6 @@ describe('Lists controller', () => {
 
       describe('receives a valid request', () => {
         const testList = {
-          userId: 'testUserId',
           title: 'test shopping list',
           recipeId: 'testRecipeId'
         }

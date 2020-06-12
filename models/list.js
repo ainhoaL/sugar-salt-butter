@@ -20,8 +20,7 @@ const ListSchema = new Schema({
     required: true
   },
   title: {
-    type: String,
-    required: true
+    type: String
   },
   dateCreated: {
     type: Date,

@@ -163,7 +163,6 @@ describe('Routes', () => {
   })
 
   describe('lists', () => {
-    let listsCreateStub
     let listsGetStub
     let listsUpdateStub
     let verifyStub
@@ -184,12 +183,11 @@ describe('Routes', () => {
     }
 
     beforeEach(() => {
-      listsCreateStub = sinon.stub(listsController, 'create')
-      listsCreateStub.callsFake((req, res) => {
+      listsUpdateStub = sinon.stub(listsController, 'update')
+      listsUpdateStub.callsFake((req, res) => {
         return res.send(dbList)
       })
       listsGetStub = sinon.stub(listsController, 'get')
-      listsUpdateStub = sinon.stub(listsController, 'update')
 
       verifyStub = sinon.stub(authentication, 'verify')
       verifyStub.callsFake((req, res, next) => {
@@ -201,9 +199,8 @@ describe('Routes', () => {
     })
 
     afterEach(() => {
-      listsCreateStub.restore()
-      listsGetStub.restore()
       listsUpdateStub.restore()
+      listsGetStub.restore()
       verifyStub.restore()
     })
 
@@ -250,45 +247,6 @@ describe('Routes', () => {
               .get('/api/v1/lists/33')
               .expect(404)
               .end((error, response) => {
-                done(error)
-              })
-          })
-        })
-      })
-
-      describe('PUT /:id', (done) => {
-        describe('with an existing id', () => {
-          beforeEach(() => {
-            listsUpdateStub.callsFake((req, res) => {
-              return res.sendStatus(204)
-            })
-          })
-
-          it('updates the list and returns 204 with no content', (done) => {
-            request(app)
-              .put('/api/v1/lists/21')
-              .send(testList)
-              .expect(204)
-              .end((error, response) => {
-                expect(response.body).to.deep.equal({})
-                done(error)
-              })
-          })
-        })
-
-        describe('with an id that does not exist', () => {
-          beforeEach(() => {
-            listsUpdateStub.callsFake((req, res) => {
-              return res.sendStatus(404)
-            })
-          })
-
-          it('returns 404', (done) => {
-            request(app)
-              .put('/api/v1/lists/33')
-              .send(testList)
-              .expect(404)
-              .end((error) => {
                 done(error)
               })
           })

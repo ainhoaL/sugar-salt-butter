@@ -102,27 +102,16 @@ module.exports = {
     if (!req.userId) {
       return res.sendStatus(401) // Not authorized
     }
-    if (req.params.id && req.body && req.body.recipeId) {
-      // Get recipe
-      let recipeIngredients
-      return module.exports.getRecipeIngredients(req.body.recipeId, req.userId)
-        .then((ingredients) => {
-          recipeIngredients = ingredients
-          return List.findOne({ _id: req.params.id, userId: req.userId })
-        })
+    if (req.body && req.body.recipeId) {
+      let updateOrCreateListPromise
+      if (req.body._id) {
+        updateOrCreateListPromise = module.exports.updateList(req.body, req.userId)
+      } else {
+        updateOrCreateListPromise = module.exports.createList(req.body, req.userId)
+      }
+      updateOrCreateListPromise
         .then((dbList) => {
-          if (!dbList) {
-            return res.sendStatus(404)
-          }
-          const newList = {}
-          const items = module.exports.updateListItems(dbList.items, recipeIngredients)
-          newList.items = items
-          newList.title = req.body.title
-          // Create list
-          return dbList.save(newList)
-        })
-        .then(() => {
-          return res.sendStatus(204)
+          res.send(dbList)
         })
         .catch((error) => {
           if (error.statusCode === 404) {
@@ -134,5 +123,40 @@ module.exports = {
     } else {
       res.status(400).send('missing recipe ID or body')
     }
+  },
+
+  createList (list, userId) {
+    return module.exports.getRecipeIngredients(list.recipeId, userId)
+      .then((ingredients) => {
+        const newList = {}
+        newList.userId = userId
+        newList.items = module.exports.updateListItems([], ingredients)
+        newList.title = list.title
+        // Create list
+        return List.create(newList)
+      })
+  },
+
+  updateList (list, userId) {
+    // Get recipe
+    let recipeIngredients
+    return module.exports.getRecipeIngredients(list.recipeId, userId)
+      .then((ingredients) => {
+        recipeIngredients = ingredients
+        return List.findOne({ _id: list._id, userId: userId })
+      })
+      .then((dbList) => {
+        if (!dbList) {
+          const listNotFoundError = new Error('List not found')
+          listNotFoundError.statusCode = 404
+          return Promise.reject(listNotFoundError)
+        }
+        const newList = {}
+        const items = module.exports.updateListItems(dbList.items, recipeIngredients)
+        newList.items = items
+        newList.title = list.title
+        // Create list
+        return dbList.save(newList)
+      })
   }
 }

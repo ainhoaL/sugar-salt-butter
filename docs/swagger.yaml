@@ -387,8 +387,6 @@ definitions:
           $ref: "#/definitions/Recipe"
   List:
     type: "object"
-    required:
-    - "title"
     properties:
       userId:
         type: "string"
@@ -397,6 +395,12 @@ definitions:
         example: "choc chip cookies"
       recipeId:
         type: "string"
+      dateCreated:
+        type: "string"
+        format: "date-time"
+      dateLastEdited:
+        type: "string"
+        format: "date-time"
       items:
         type: "array"
         xml:

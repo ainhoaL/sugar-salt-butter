@@ -22,152 +22,6 @@ describe('Lists controller', () => {
       req.userId = 'testUserId'
     })
 
-    describe('create', () => {
-      let getRecipeIngredientsStub
-      let listCreateStub
-
-      beforeEach(() => {
-        getRecipeIngredientsStub = sinon.stub(listsController, 'getRecipeIngredients')
-        listCreateStub = sinon.stub(List, 'create')
-      })
-
-      afterEach(() => {
-        getRecipeIngredientsStub.restore()
-        listCreateStub.restore()
-      })
-
-      describe('receives a request without some parameters', () => {
-        const testList = {
-          title: 'test shopping list'
-        }
-
-        it('does not create a list in the database if request has no recipeId', (done) => {
-          req.body = testList
-
-          res.on('end', () => {
-            expect(getRecipeIngredientsStub.callCount).to.equal(0)
-            expect(listCreateStub.callCount).to.equal(0)
-            expect(res._getStatusCode()).to.equal(400)
-            expect(res._getData()).to.deep.equal('missing recipe ID')
-            done()
-          })
-
-          listsController.create(req, res)
-        })
-
-        it('returns an error if request has no userId', (done) => {
-          req.body = testList
-          req.userId = null
-
-          res.on('end', () => {
-            expect(getRecipeIngredientsStub.callCount).to.equal(0)
-            expect(listCreateStub.callCount).to.equal(0)
-            expect(res._getStatusCode()).to.equal(401)
-            done()
-          })
-
-          listsController.create(req, res)
-        })
-      })
-
-      describe('receives a valid request', () => {
-        const testList = {
-          title: 'test shopping list',
-          recipeId: 'testRecipeId'
-        }
-
-        describe('getRecipeIngredients fails', () => {
-          it('returns a 404 error if getRecipeIngredients does not find a recipe', (done) => {
-            req.body = testList
-            const notFoundError = new Error('no recipe')
-            notFoundError.statusCode = 404
-
-            getRecipeIngredientsStub.rejects(notFoundError)
-
-            res.on('end', () => {
-              expect(getRecipeIngredientsStub.callCount).to.equal(1)
-              expect(getRecipeIngredientsStub).to.have.been.calledWith('testRecipeId', 'testUserId')
-              expect(listCreateStub.callCount).to.equal(0)
-              expect(res._getStatusCode()).to.equal(404)
-              expect(res._getData()).to.deep.equal('recipe does not exist')
-              done()
-            })
-
-            listsController.create(req, res)
-          })
-
-          it('returns an error if getRecipeIngredients fails', (done) => {
-            req.body = testList
-
-            getRecipeIngredientsStub.rejects(new Error('failed to get recipe'))
-
-            res.on('end', () => {
-              expect(getRecipeIngredientsStub.callCount).to.equal(1)
-              expect(getRecipeIngredientsStub).to.have.been.calledWith('testRecipeId', 'testUserId')
-              expect(listCreateStub.callCount).to.equal(0)
-              expect(res._getStatusCode()).to.equal(500)
-              expect(res._getData()).to.deep.equal('failed to get recipe')
-              done()
-            })
-
-            listsController.create(req, res)
-          })
-        })
-
-        describe('getRecipeIngredients succeeds', () => {
-          const expectedList = {
-            userId: 'testUserId',
-            title: 'test shopping list',
-            items: [{ quantity: 1, name: 'onion' }, { quantity: 500, unit: 'g', name: 'minced beef' }, { name: 'pinch of salt' }]
-          }
-
-          const dbList = {
-            _id: 'testListId',
-            userId: 'testUserId',
-            title: 'test shopping list',
-            items: [{ quantity: 1, name: 'onion' }, { quantity: 500, unit: 'g', name: 'minced beef' }, { name: 'pinch of salt' }]
-          }
-
-          it('returns an error if it fails to create list', (done) => {
-            req.body = testList
-
-            getRecipeIngredientsStub.resolves([{ quantity: 1, name: 'onion' }, { quantity: 500, unit: 'g', name: 'minced beef' }, { name: 'pinch of salt' }])
-            listCreateStub.rejects(new Error('failed to create list'))
-
-            res.on('end', () => {
-              expect(getRecipeIngredientsStub.callCount).to.equal(1)
-              expect(getRecipeIngredientsStub).to.have.been.calledWith('testRecipeId', 'testUserId')
-              expect(listCreateStub.callCount).to.equal(1)
-              expect(listCreateStub).to.have.been.calledWith(expectedList)
-              expect(res._getStatusCode()).to.equal(500)
-              done()
-            })
-
-            listsController.create(req, res)
-          })
-
-          it('creates a new list', (done) => {
-            req.body = testList
-
-            getRecipeIngredientsStub.resolves([{ quantity: 1, name: 'onion' }, { quantity: 500, unit: 'g', name: 'minced beef' }, { name: 'pinch of salt' }])
-            listCreateStub.resolves(dbList)
-
-            res.on('end', () => {
-              expect(getRecipeIngredientsStub.callCount).to.equal(1)
-              expect(getRecipeIngredientsStub).to.have.been.calledWith('testRecipeId', 'testUserId')
-              expect(listCreateStub.callCount).to.equal(1)
-              expect(listCreateStub).to.have.been.calledWith(expectedList)
-              expect(res._getStatusCode()).to.equal(200)
-              expect(res._getData()).to.deep.equal(dbList)
-              done()
-            })
-
-            listsController.create(req, res)
-          })
-        })
-      })
-    })
-
     describe('get', () => {
       let listFindOneStub
 
@@ -271,222 +125,239 @@ describe('Lists controller', () => {
         })
       })
     })
+  })
 
-    describe('update', () => {
-      let getRecipeIngredientsStub
-      let listFindOneStub
+  describe('createList', () => {
+    let getRecipeIngredientsStub
+    let listCreateStub
 
-      let testList
-      let testListSaveStub
+    beforeEach(() => {
+      getRecipeIngredientsStub = sinon.stub(listsController, 'getRecipeIngredients')
+      listCreateStub = sinon.stub(List, 'create')
+    })
 
-      beforeEach(() => {
-        getRecipeIngredientsStub = sinon.stub(listsController, 'getRecipeIngredients')
-        listFindOneStub = sinon.stub(List, 'findOne')
-        testListSaveStub = sinon.stub()
+    afterEach(() => {
+      getRecipeIngredientsStub.restore()
+      listCreateStub.restore()
+    })
 
-        testList = {
-          title: 'new test shopping list title',
-          recipeId: 'testRecipeId'
+    describe('receives a valid request', () => {
+      const testList = {
+        title: 'test shopping list',
+        recipeId: 'testRecipeId'
+      }
+
+      describe('getRecipeIngredients fails', () => {
+        it('returns a 404 error if getRecipeIngredients does not find a recipe', () => {
+          const notFoundError = new Error('no recipe')
+          notFoundError.statusCode = 404
+          getRecipeIngredientsStub.rejects(notFoundError)
+
+          return expect(listsController.createList(testList, 'testUserId')).to.be.rejected
+            .then((error) => {
+              expect(error.message).to.equal('no recipe')
+              expect(error.statusCode).to.equal(404)
+              expect(getRecipeIngredientsStub.callCount).to.equal(1)
+              expect(getRecipeIngredientsStub).to.have.been.calledWith('testRecipeId', 'testUserId')
+              expect(listCreateStub.callCount).to.equal(0)
+            })
+        })
+
+        it('returns an error if getRecipeIngredients fails', () => {
+          getRecipeIngredientsStub.rejects(new Error('failed to get recipe'))
+
+          return expect(listsController.createList(testList, 'testUserId')).to.be.rejected
+            .then((error) => {
+              expect(error.message).to.equal('failed to get recipe')
+              expect(getRecipeIngredientsStub.callCount).to.equal(1)
+              expect(getRecipeIngredientsStub).to.have.been.calledWith('testRecipeId', 'testUserId')
+              expect(listCreateStub.callCount).to.equal(0)
+            })
+        })
+      })
+
+      describe('getRecipeIngredients succeeds', () => {
+        const expectedList = {
+          userId: 'testUserId',
+          title: 'test shopping list',
+          items: [{ quantity: 1, name: 'onion' }, { quantity: 500, unit: 'g', name: 'minced beef' }, { name: 'pinch of salt' }]
         }
-        req.params = { id: 'testListId' }
-      })
 
-      afterEach(() => {
-        getRecipeIngredientsStub.restore()
-        listFindOneStub.restore()
-      })
+        const dbList = {
+          _id: 'testListId',
+          userId: 'testUserId',
+          title: 'test shopping list',
+          items: [{ quantity: 1, name: 'onion' }, { quantity: 500, unit: 'g', name: 'minced beef' }, { name: 'pinch of salt' }]
+        }
 
-      describe('receives a request without some parameters', () => {
-        it('does not update the list in the database if request has no recipeId', (done) => {
-          req.body = {
-            title: 'test shopping list'
-          }
+        it('returns an error if it fails to create list', () => {
+          getRecipeIngredientsStub.resolves([{ quantity: 1, name: 'onion' }, { quantity: 500, unit: 'g', name: 'minced beef' }, { name: 'pinch of salt' }])
+          listCreateStub.rejects(new Error('failed to create list'))
 
-          res.on('end', () => {
-            expect(getRecipeIngredientsStub.callCount).to.equal(0)
-            expect(listFindOneStub.callCount).to.equal(0)
-            expect(res._getStatusCode()).to.equal(400)
-            expect(res._getData()).to.deep.equal('missing recipe ID or body')
-            done()
-          })
-
-          listsController.update(req, res)
+          return expect(listsController.createList(testList, 'testUserId')).to.be.rejected
+            .then((error) => {
+              expect(error.message).to.equal('failed to create list')
+              expect(getRecipeIngredientsStub.callCount).to.equal(1)
+              expect(getRecipeIngredientsStub).to.have.been.calledWith('testRecipeId', 'testUserId')
+              expect(listCreateStub.callCount).to.equal(1)
+              expect(listCreateStub).to.have.been.calledWith(expectedList)
+            })
         })
 
-        it('returns an error if request has no userId', (done) => {
-          req.body = {
-            title: 'test shopping list',
-            recipeId: 'testRecipeId'
-          }
-          req.userId = null
+        it('creates a new list', () => {
+          getRecipeIngredientsStub.resolves([{ quantity: 1, name: 'onion' }, { quantity: 500, unit: 'g', name: 'minced beef' }, { name: 'pinch of salt' }])
+          listCreateStub.resolves(dbList)
 
-          res.on('end', () => {
-            expect(getRecipeIngredientsStub.callCount).to.equal(0)
-            expect(listFindOneStub.callCount).to.equal(0)
-            expect(res._getStatusCode()).to.equal(401)
-            done()
-          })
-
-          listsController.update(req, res)
-        })
-
-        it('returns an error if request has no list id', (done) => {
-          req.body = {
-            title: 'test shopping list',
-            recipeId: 'testRecipeId'
-          }
-          req.params = {}
-
-          res.on('end', () => {
-            expect(getRecipeIngredientsStub.callCount).to.equal(0)
-            expect(listFindOneStub.callCount).to.equal(0)
-            expect(res._getStatusCode()).to.equal(400)
-            expect(res._getData()).to.deep.equal('missing recipe ID or body')
-            done()
-          })
-
-          listsController.update(req, res)
+          return expect(listsController.createList(testList, 'testUserId')).to.not.be.rejected
+            .then((data) => {
+              expect(getRecipeIngredientsStub.callCount).to.equal(1)
+              expect(getRecipeIngredientsStub).to.have.been.calledWith('testRecipeId', 'testUserId')
+              expect(listCreateStub.callCount).to.equal(1)
+              expect(listCreateStub).to.have.been.calledWith(expectedList)
+              expect(data).to.deep.equal(dbList)
+            })
         })
       })
+    })
+  })
 
-      describe('receives a valid request', () => {
-        describe('getRecipeIngredients fails', () => {
-          it('returns a 404 error if getRecipeIngredients does not find a recipe', (done) => {
-            req.body = testList
-            const notFoundError = new Error('no recipe')
-            notFoundError.statusCode = 404
+  describe('updateList', () => {
+    let getRecipeIngredientsStub
+    let listFindOneStub
 
-            getRecipeIngredientsStub.rejects(notFoundError)
+    let testList
+    let testListSaveStub
 
-            res.on('end', () => {
+    beforeEach(() => {
+      getRecipeIngredientsStub = sinon.stub(listsController, 'getRecipeIngredients')
+      listFindOneStub = sinon.stub(List, 'findOne')
+      testListSaveStub = sinon.stub()
+
+      testList = {
+        _id: 'testListId',
+        title: 'new test shopping list title',
+        recipeId: 'testRecipeId'
+      }
+    })
+
+    afterEach(() => {
+      getRecipeIngredientsStub.restore()
+      listFindOneStub.restore()
+    })
+
+    describe('receives a valid request', () => {
+      describe('getRecipeIngredients fails', () => {
+        it('returns a 404 error if getRecipeIngredients does not find a recipe', () => {
+          const notFoundError = new Error('no recipe')
+          notFoundError.statusCode = 404
+
+          getRecipeIngredientsStub.rejects(notFoundError)
+
+          return expect(listsController.updateList(testList, 'testUserId')).to.be.rejected
+            .then((error) => {
               expect(getRecipeIngredientsStub.callCount).to.equal(1)
               expect(getRecipeIngredientsStub).to.have.been.calledWith('testRecipeId', 'testUserId')
               expect(listFindOneStub.callCount).to.equal(0)
-              expect(res._getStatusCode()).to.equal(404)
-              expect(res._getData()).to.deep.equal('recipe does not exist')
-              done()
+              expect(error.statusCode).to.equal(404)
+              expect(error.message).to.deep.equal('no recipe')
             })
+        })
 
-            listsController.update(req, res)
-          })
+        it('returns an error if getRecipeIngredients fails', () => {
+          getRecipeIngredientsStub.rejects(new Error('failed to get recipe'))
 
-          it('returns an error if getRecipeIngredients fails', (done) => {
-            req.body = testList
-
-            getRecipeIngredientsStub.rejects(new Error('failed to get recipe'))
-
-            res.on('end', () => {
+          return expect(listsController.updateList(testList, 'testUserId')).to.be.rejected
+            .then((error) => {
               expect(getRecipeIngredientsStub.callCount).to.equal(1)
               expect(getRecipeIngredientsStub).to.have.been.calledWith('testRecipeId', 'testUserId')
               expect(listFindOneStub.callCount).to.equal(0)
-              expect(res._getStatusCode()).to.equal(500)
-              expect(res._getData()).to.deep.equal('failed to get recipe')
-              done()
+              expect(error.message).to.deep.equal('failed to get recipe')
             })
+        })
+      })
 
-            listsController.update(req, res)
+      describe('getRecipeIngredients succeeds', () => {
+        beforeEach(() => {
+          getRecipeIngredientsStub.resolves([{ quantity: 1, name: 'onion' }, { quantity: 500, unit: 'g', name: 'minced beef' }, { name: 'pinch of salt' }])
+        })
+
+        describe('find List fails', () => {
+          it('returns a 404 error if it does not find a list that matches the id', () => {
+            listFindOneStub.resolves(null)
+
+            return expect(listsController.updateList(testList, 'testUserId')).to.be.rejected
+              .then((error) => {
+                expect(getRecipeIngredientsStub.callCount).to.equal(1)
+                expect(getRecipeIngredientsStub).to.have.been.calledWith('testRecipeId', 'testUserId')
+                expect(listFindOneStub.callCount).to.equal(1)
+                expect(listFindOneStub).to.have.been.calledWith({ _id: 'testListId', userId: 'testUserId' })
+                expect(testListSaveStub.callCount).to.equal(0)
+                expect(error.message).to.deep.equal('List not found')
+                expect(error.statusCode).to.equal(404)
+              })
+          })
+
+          it('returns an error if find list fails', () => {
+            listFindOneStub.rejects(new Error('failed to get list'))
+
+            return expect(listsController.updateList(testList, 'testUserId')).to.be.rejected
+              .then((error) => {
+                expect(getRecipeIngredientsStub.callCount).to.equal(1)
+                expect(getRecipeIngredientsStub).to.have.been.calledWith('testRecipeId', 'testUserId')
+                expect(listFindOneStub.callCount).to.equal(1)
+                expect(listFindOneStub).to.have.been.calledWith({ _id: 'testListId', userId: 'testUserId' })
+                expect(testListSaveStub.callCount).to.equal(0)
+                expect(error.message).to.deep.equal('failed to get list')
+              })
           })
         })
 
-        describe('getRecipeIngredients succeeds', () => {
+        describe('find List succeeds', () => {
+          const expectedList = {
+            title: 'new test shopping list title',
+            items: [{ quantity: 1, name: 'garlic clove' }, { quantity: 30, unit: 'g', name: 'flour' }, { name: 'rosemary' }, { quantity: 1, name: 'onion' }, { quantity: 500, unit: 'g', name: 'minced beef' }, { name: 'pinch of salt' }]
+          }
+
+          let dbList
           beforeEach(() => {
-            getRecipeIngredientsStub.resolves([{ quantity: 1, name: 'onion' }, { quantity: 500, unit: 'g', name: 'minced beef' }, { name: 'pinch of salt' }])
-          })
-
-          describe('find List fails', () => {
-            it('returns a 404 error if it does not find a list that matches the id', (done) => {
-              req.body = testList
-
-              listFindOneStub.resolves(null)
-
-              res.on('end', () => {
-                expect(getRecipeIngredientsStub.callCount).to.equal(1)
-                expect(getRecipeIngredientsStub).to.have.been.calledWith('testRecipeId', 'testUserId')
-                expect(listFindOneStub.callCount).to.equal(1)
-                expect(listFindOneStub).to.have.been.calledWith({ _id: 'testListId', userId: 'testUserId' })
-                expect(testListSaveStub.callCount).to.equal(0)
-                expect(res._getStatusCode()).to.equal(404)
-                done()
-              })
-
-              listsController.update(req, res)
-            })
-
-            it('returns an error if find list fails', (done) => {
-              req.body = testList
-
-              listFindOneStub.rejects(new Error('failed to get list'))
-
-              res.on('end', () => {
-                expect(getRecipeIngredientsStub.callCount).to.equal(1)
-                expect(getRecipeIngredientsStub).to.have.been.calledWith('testRecipeId', 'testUserId')
-                expect(listFindOneStub.callCount).to.equal(1)
-                expect(listFindOneStub).to.have.been.calledWith({ _id: 'testListId', userId: 'testUserId' })
-                expect(testListSaveStub.callCount).to.equal(0)
-                expect(res._getStatusCode()).to.equal(500)
-                expect(res._getData()).to.deep.equal('failed to get list')
-                done()
-              })
-
-              listsController.update(req, res)
-            })
-          })
-
-          describe('find List succeeds', () => {
-            const expectedList = {
-              title: 'new test shopping list title',
-              items: [{ quantity: 1, name: 'garlic clove' }, { quantity: 30, unit: 'g', name: 'flour' }, { name: 'rosemary' }, { quantity: 1, name: 'onion' }, { quantity: 500, unit: 'g', name: 'minced beef' }, { name: 'pinch of salt' }]
+            dbList = {
+              _id: 'testListId',
+              userId: 'testUserId',
+              title: 'test shopping list',
+              items: [{ quantity: 1, name: 'garlic clove' }, { quantity: 30, unit: 'g', name: 'flour' }, { name: 'rosemary' }],
+              save: testListSaveStub
             }
+            listFindOneStub.resolves(dbList)
+          })
 
-            let dbList
-            beforeEach(() => {
-              dbList = {
-                _id: 'testListId',
-                userId: 'testUserId',
-                title: 'test shopping list',
-                items: [{ quantity: 1, name: 'garlic clove' }, { quantity: 30, unit: 'g', name: 'flour' }, { name: 'rosemary' }],
-                save: testListSaveStub
-              }
-              listFindOneStub.resolves(dbList)
-            })
+          it('returns an error if it fails to update list', () => {
+            testListSaveStub.rejects(new Error('failed to update list'))
 
-            it('returns an error if it fails to update list', (done) => {
-              req.body = testList
-
-              testListSaveStub.rejects(new Error('failed to update list'))
-
-              res.on('end', () => {
+            return expect(listsController.updateList(testList, 'testUserId')).to.be.rejected
+              .then((error) => {
                 expect(getRecipeIngredientsStub.callCount).to.equal(1)
                 expect(getRecipeIngredientsStub).to.have.been.calledWith('testRecipeId', 'testUserId')
                 expect(listFindOneStub.callCount).to.equal(1)
                 expect(listFindOneStub).to.have.been.calledWith({ _id: 'testListId', userId: 'testUserId' })
                 expect(testListSaveStub.callCount).to.equal(1)
                 expect(testListSaveStub).to.have.been.calledWith(expectedList)
-                expect(res._getStatusCode()).to.equal(500)
-                done()
+                expect(error.message).to.deep.equal('failed to update list')
               })
+          })
 
-              listsController.update(req, res)
-            })
+          it('creates a new list', () => {
+            testListSaveStub.resolves(dbList)
 
-            it('creates a new list', (done) => {
-              req.body = testList
-
-              testListSaveStub.resolves(dbList)
-
-              res.on('end', () => {
+            return expect(listsController.updateList(testList, 'testUserId')).to.not.be.rejected
+              .then((data) => {
                 expect(getRecipeIngredientsStub.callCount).to.equal(1)
                 expect(getRecipeIngredientsStub).to.have.been.calledWith('testRecipeId', 'testUserId')
                 expect(listFindOneStub.callCount).to.equal(1)
                 expect(listFindOneStub).to.have.been.calledWith({ _id: 'testListId', userId: 'testUserId' })
                 expect(testListSaveStub.callCount).to.equal(1)
                 expect(testListSaveStub).to.have.been.calledWith(expectedList)
-                expect(res._getStatusCode()).to.equal(204)
-                done()
+                expect(data).to.equal(dbList)
               })
-
-              listsController.update(req, res)
-            })
           })
         })
       })

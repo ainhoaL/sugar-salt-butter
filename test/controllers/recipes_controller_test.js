@@ -353,7 +353,6 @@ describe('Recipes controller', () => {
                 expect(skipStub.callCount).to.equal(1)
                 expect(skipStub).to.have.been.calledWith(12)
                 expect(res._getStatusCode()).to.equal(500)
-                console.log(res._getData())
                 expect(res._getData()).to.equal('Error searching')
                 done()
               })

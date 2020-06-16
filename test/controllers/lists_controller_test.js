@@ -125,6 +125,200 @@ describe('Lists controller', () => {
         })
       })
     })
+
+    describe('update', () => {
+      let updateListStub
+      let createListStub
+
+      beforeEach(() => {
+        updateListStub = sinon.stub(listsController, 'updateList')
+        createListStub = sinon.stub(listsController, 'createList')
+      })
+
+      afterEach(() => {
+        updateListStub.restore()
+        createListStub.restore()
+      })
+
+      describe('receives a request with body and recipe id', () => {
+        const dbList = {
+          _id: 'testId',
+          userId: 'testUserId',
+          title: 'test shopping list',
+          ingredients: [{ quantity: null, unit: null, name: 'fake ingredient' }]
+        }
+
+        describe('and a list id', () => {
+          describe('and the recipe does not exist', () => {
+            it('returns a 404 error', (done) => {
+              req.body = { _id: 'testId', recipeId: 'testRecipeId' }
+
+              const notFoundError = new Error('no recipe')
+              notFoundError.statusCode = 404
+              updateListStub.rejects(notFoundError)
+
+              res.on('end', () => {
+                expect(updateListStub.callCount).to.equal(1)
+                expect(updateListStub).to.have.been.calledWith({ _id: 'testId', recipeId: 'testRecipeId' }, 'testUserId')
+                expect(createListStub.callCount).to.equal(0)
+                expect(res._getStatusCode()).to.equal(404)
+                expect(res._getData()).to.equal('recipe does not exist')
+                done()
+              })
+
+              listsController.update(req, res)
+            })
+          })
+
+          describe('and updating the list fails', () => {
+            it('returns a 500 error', (done) => {
+              req.body = { _id: 'testId', recipeId: 'testRecipeId' }
+
+              updateListStub.rejects(new Error('error updating list'))
+
+              res.on('end', () => {
+                expect(updateListStub.callCount).to.equal(1)
+                expect(updateListStub).to.have.been.calledWith({ _id: 'testId', recipeId: 'testRecipeId' }, 'testUserId')
+                expect(createListStub.callCount).to.equal(0)
+                expect(res._getStatusCode()).to.equal(500)
+                expect(res._getData()).to.equal('error updating list')
+                done()
+              })
+
+              listsController.update(req, res)
+            })
+          })
+
+          describe('and updating the list succeeds', () => {
+            it('returns the list', (done) => {
+              req.body = { _id: 'testId', recipeId: 'testRecipeId' }
+
+              updateListStub.resolves(dbList)
+
+              res.on('end', () => {
+                expect(updateListStub.callCount).to.equal(1)
+                expect(updateListStub).to.have.been.calledWith({ _id: 'testId', recipeId: 'testRecipeId' }, 'testUserId')
+                expect(createListStub.callCount).to.equal(0)
+                expect(res._getStatusCode()).to.equal(200)
+                expect(res._getData()).to.deep.equal(dbList)
+                done()
+              })
+
+              listsController.update(req, res)
+            })
+          })
+        })
+
+        describe('and no list id', () => {
+          describe('and the recipe does not exist', () => {
+            it('returns a 404 error', (done) => {
+              req.body = { recipeId: 'testRecipeId' }
+
+              const notFoundError = new Error('no recipe')
+              notFoundError.statusCode = 404
+              createListStub.rejects(notFoundError)
+
+              res.on('end', () => {
+                expect(createListStub.callCount).to.equal(1)
+                expect(createListStub).to.have.been.calledWith({ recipeId: 'testRecipeId' }, 'testUserId')
+                expect(updateListStub.callCount).to.equal(0)
+                expect(res._getStatusCode()).to.equal(404)
+                expect(res._getData()).to.equal('recipe does not exist')
+                done()
+              })
+
+              listsController.update(req, res)
+            })
+          })
+
+          describe('and updating the list fails', () => {
+            it('returns a 500 error', (done) => {
+              req.body = { recipeId: 'testRecipeId' }
+
+              createListStub.rejects(new Error('error updating list'))
+
+              res.on('end', () => {
+                expect(createListStub.callCount).to.equal(1)
+                expect(createListStub).to.have.been.calledWith({ recipeId: 'testRecipeId' }, 'testUserId')
+                expect(updateListStub.callCount).to.equal(0)
+                expect(res._getStatusCode()).to.equal(500)
+                expect(res._getData()).to.equal('error updating list')
+                done()
+              })
+
+              listsController.update(req, res)
+            })
+          })
+
+          describe('and updating the list succeeds', () => {
+            it('returns the list', (done) => {
+              req.body = { recipeId: 'testRecipeId' }
+
+              createListStub.resolves(dbList)
+
+              res.on('end', () => {
+                expect(createListStub.callCount).to.equal(1)
+                expect(createListStub).to.have.been.calledWith({ recipeId: 'testRecipeId' }, 'testUserId')
+                expect(updateListStub.callCount).to.equal(0)
+                expect(res._getStatusCode()).to.equal(200)
+                expect(res._getData()).to.deep.equal(dbList)
+                done()
+              })
+
+              listsController.update(req, res)
+            })
+          })
+        })
+      })
+
+      describe('receives a request without recipe id', () => {
+        it('returns a 400 error', (done) => {
+          req.body = { }
+
+          res.on('end', () => {
+            expect(createListStub.callCount).to.equal(0)
+            expect(updateListStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(400)
+            expect(res._getData()).to.deep.equal('missing recipe ID or body')
+            done()
+          })
+
+          listsController.update(req, res)
+        })
+      })
+
+      describe('receives a request without a body', () => {
+        it('returns a 400 error', (done) => {
+          req.body = null
+
+          res.on('end', () => {
+            expect(createListStub.callCount).to.equal(0)
+            expect(updateListStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(400)
+            expect(res._getData()).to.deep.equal('missing recipe ID or body')
+            done()
+          })
+
+          listsController.update(req, res)
+        })
+      })
+
+      describe('receives a request without userId id', () => {
+        it('returns a 400 error', (done) => {
+          req.params = { }
+          req.userId = null
+
+          res.on('end', () => {
+            expect(createListStub.callCount).to.equal(0)
+            expect(updateListStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(401)
+            done()
+          })
+
+          listsController.update(req, res)
+        })
+      })
+    })
   })
 
   describe('createList', () => {

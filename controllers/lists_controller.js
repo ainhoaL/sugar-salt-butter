@@ -3,38 +3,6 @@ const List = require('../models/list')
 
 module.exports = {
 
-  /**
-   * Create list
-   * @param req {request object}
-   * @param res {response object}
-   */
-  create (req, res) {
-    if (!req.userId) {
-      return res.sendStatus(401) // Not authorized
-    }
-    if (req.body && req.body.recipeId) {
-      // Get recipe
-      return module.exports.getRecipeIngredients(req.body.recipeId, req.userId)
-        .then((ingredients) => {
-          const newList = {}
-          newList.userId = req.userId
-          newList.items = module.exports.updateListItems([], ingredients)
-          newList.title = req.body.title
-          // Create list
-          return List.create(newList).then(dbList => res.send(dbList))
-        })
-        .catch((error) => {
-          if (error.statusCode === 404) {
-            return res.status(404).send('recipe does not exist')
-          } else {
-            return res.status(500).send(error.message)
-          }
-        })
-    } else {
-      return res.status(400).send('missing recipe ID')
-    }
-  },
-
   getRecipeIngredients (recipeId, userId) {
     return Recipe.findOne({ _id: recipeId, userId: userId })
       .catch((error) => {

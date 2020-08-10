@@ -164,15 +164,26 @@ describe('Routes', () => {
 
   describe('lists', () => {
     let listsGetStub
-    let listsUpdateStub
+    let listsCreateStub
+    let listsGetAllStub
+    let addRecipeToListStub
+    let deleteRecipeFromListStub
     let verifyStub
 
     const userId = 'user1'
 
     const testList = {
-      userId: userId,
-      title: 'test shopping list',
-      recipeId: 'testRecipeId'
+      title: 'test shopping list'
+    }
+
+    const dbTestLists = [
+      { _id: 'list1', title: 'test shopping list', items: [{ name: 'first item' }] },
+      { _id: 'list2', title: 'test shopping list 2', items: [{ quantity: 1, name: 'second item' }] }
+    ]
+
+    const testListRecipe = {
+      recipeId: 'recipe1',
+      recipeServings: '4'
     }
 
     const dbList = {
@@ -183,11 +194,23 @@ describe('Routes', () => {
     }
 
     beforeEach(() => {
-      listsUpdateStub = sinon.stub(listsController, 'update')
-      listsUpdateStub.callsFake((req, res) => {
+      listsCreateStub = sinon.stub(listsController, 'create')
+      listsCreateStub.callsFake((req, res) => {
         return res.send(dbList)
       })
       listsGetStub = sinon.stub(listsController, 'get')
+      listsGetAllStub = sinon.stub(listsController, 'getAll')
+      listsGetAllStub.callsFake((req, res) => {
+        return res.send(dbTestLists)
+      })
+      addRecipeToListStub = sinon.stub(listsController, 'addRecipeToList')
+      addRecipeToListStub.callsFake((req, res) => {
+        return res.sendStatus(204)
+      })
+      deleteRecipeFromListStub = sinon.stub(listsController, 'deleteRecipeFromList')
+      deleteRecipeFromListStub.callsFake((req, res) => {
+        return res.sendStatus(204)
+      })
 
       verifyStub = sinon.stub(authentication, 'verify')
       verifyStub.callsFake((req, res, next) => {
@@ -199,8 +222,11 @@ describe('Routes', () => {
     })
 
     afterEach(() => {
-      listsUpdateStub.restore()
+      listsCreateStub.restore()
       listsGetStub.restore()
+      listsGetAllStub.restore()
+      addRecipeToListStub.restore()
+      deleteRecipeFromListStub.restore()
       verifyStub.restore()
     })
 
@@ -212,6 +238,16 @@ describe('Routes', () => {
           .expect(200)
           .end((error, response) => {
             expect(response.body).to.deep.equal(dbList)
+            done(error)
+          })
+      })
+
+      it('GET', (done) => {
+        request(app)
+          .get('/api/v1/lists')
+          .expect(200)
+          .end((error, response) => {
+            expect(response.body).to.deep.equal(dbTestLists)
             done(error)
           })
       })
@@ -251,6 +287,27 @@ describe('Routes', () => {
               })
           })
         })
+      })
+    })
+
+    describe('/api/v1/lists/:id/recipes', () => {
+      it('POST adds a recipe to a list', (done) => {
+        request(app)
+          .post('/api/v1/lists/list1/recipes')
+          .send(testListRecipe)
+          .expect(204)
+          .end((error, response) => {
+            done(error)
+          })
+      })
+
+      it('DELETE removes a recipe from a list', (done) => {
+        request(app)
+          .delete('/api/v1/lists/list1/recipes/recipe1')
+          .expect(204)
+          .end((error, response) => {
+            done(error)
+          })
       })
     })
   })

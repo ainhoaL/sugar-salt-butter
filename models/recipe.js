@@ -20,11 +20,7 @@ const RecipeIngredientSchema = new Schema({
 
 /* istanbul ignore next */
 RecipeIngredientSchema.virtual('displayQuantity').get(function () {
-  if (this.unit === 'cup' || this.unit === 'tbsp' || this.unit === 'tsp') {
-    return parsing.numberToFraction(this.quantity)
-  } else {
-    return this.quantity
-  }
+  return parsing.parseMetricToNonMetric(this.unit, this.quantity)
 })
 
 RecipeIngredientSchema.set('toJSON', {

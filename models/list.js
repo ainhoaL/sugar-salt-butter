@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
+const parsing = require('../utils/parsing')
 
 const ListItemSchema = new Schema({
   quantity: {
@@ -11,7 +12,22 @@ const ListItemSchema = new Schema({
   name: {
     type: String,
     required: true
+  },
+  recipeId: {
+    type: String
+  },
+  servings: {
+    type: Number
   }
+})
+
+/* istanbul ignore next */
+ListItemSchema.virtual('displayQuantity').get(function () {
+  return parsing.parseMetricToNonMetric(this.unit, this.quantity)
+})
+
+ListItemSchema.set('toJSON', {
+  virtuals: true
 })
 
 const ListSchema = new Schema({

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "standard && nyc mocha --recursive --exit"
+    "test": "standard && nyc --reporter=lcov --reporter=text mocha --recursive --exit"
   },
   "repository": {
     "type": "git",

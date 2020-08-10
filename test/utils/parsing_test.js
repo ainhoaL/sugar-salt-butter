@@ -172,4 +172,19 @@ describe('parsing', () => {
       })
     })
   })
+
+  describe('parseMetricToNonMetric', () => {
+    it('changes number to fraction if unit = cups', () => {
+      expect(parsing.parseMetricToNonMetric('cup', 0.25)).to.equal('1/4')
+    })
+    it('changes number to fraction if unit = tbsp', () => {
+      expect(parsing.parseMetricToNonMetric('tbsp', 0.5)).to.equal('1/2')
+    })
+    it('changes number to fraction if unit = tsp', () => {
+      expect(parsing.parseMetricToNonMetric('tsp', 0.75)).to.equal('3/4')
+    })
+    it('dows not change number to fraction if unit = kg', () => {
+      expect(parsing.parseMetricToNonMetric('kg', 0.5)).to.equal(0.5)
+    })
+  })
 })

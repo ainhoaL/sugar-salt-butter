@@ -5,6 +5,12 @@ const baseUrl = '/api/v1/'
 const baseUrlLists = baseUrl + 'lists/'
 module.exports = {
 
+  /**
+   * get a recipe from database
+   * @param recipeId {string}
+   * @param userId {string}
+   * @returns {Promise} - Promise to return recipe from database
+   */
   getRecipe (recipeId, userId) {
     return Recipe.findOne({ _id: recipeId, userId: userId })
       .then((dbRecipe) => {
@@ -12,6 +18,15 @@ module.exports = {
       })
   },
 
+  /**
+   * Creates an array with the current list items and the ones from a recipe based on the servings of the recipe and the servings to add to list
+   * @param listItems {Array} - items currently in the list
+   * @param recipeIngredients {Array} - ingredients in a recipe
+   * @param recipeId {string}
+   * @param recipeServings {number} - number of servings in the original recipe
+   * @param servingsToAddToList {number} - number of servings of the recipe to add to the list
+   * @returns {Array} - new list of items for the shopping list
+   */
   updateListItems (listItems, recipeIngredients, recipeId, recipeServings, servingsToAddToList) {
     const newListItems = [...listItems]
     recipeIngredients.forEach((ingredient) => {
@@ -35,6 +50,11 @@ module.exports = {
     return newListItems
   },
 
+  /**
+   * creates a list object with recipe link
+   * @param dbList {Object} - list object
+   * @returns {Object} - list object with recipes property and recipes link
+   */
   buildListObject (dbList) {
     const recipeBaseUrl = baseUrlLists + dbList._id + '/recipes'
     const listWithLinks = {
@@ -52,6 +72,13 @@ module.exports = {
     return listWithLinks
   },
 
+  /**
+   * creates an array with all the recipes that are in a shopping list (including title, image, servings and API link)
+   * @param listId {string}
+   * @param items {Array} - items in the list
+   * @param userId {string}
+   * @returns {Promise} - array with recipes data
+   */
   buildRecipesArray (listId, items, userId) {
     const recipeBaseUrl = baseUrlLists + listId + '/recipes'
     const recipesData = []

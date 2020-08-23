@@ -52,7 +52,7 @@ module.exports.internal = {
     return Promise.resolve(userId)
   },
   async getUserIdFromTokenInfo (token) {
-    const client = module.exports.internal.getOauthClient()
+    const client = module.exports.internal.getOauthClient(CLIENT_ID)
     const tokenInfo = await client.getTokenInfo(token)
     return Promise.resolve(tokenInfo.sub)
   },

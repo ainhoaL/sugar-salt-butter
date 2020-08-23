@@ -48,7 +48,7 @@ describe('Authentication', () => {
       it('returns a promise with userId when the token is validated successfully', () => {
         verifyIdTokenStub.resolves(fakeTicket)
 
-        expect(authentication.internal.verifyToken('testToken')).to.not.be.rejected
+        return expect(authentication.internal.verifyToken('testToken')).to.not.be.rejected
           .then((userId) => {
             expect(verifyIdTokenStub.callCount).to.equal(1)
             expect(userId).to.equal('testuserId')
@@ -57,7 +57,7 @@ describe('Authentication', () => {
       it('returns a rejected promise if validation fails', () => {
         verifyIdTokenStub.rejects(new Error('not validated'))
 
-        expect(authentication.internal.verifyToken('testToken')).to.be.rejectedWith('not validated')
+        return expect(authentication.internal.verifyToken('testToken')).to.be.rejectedWith('not validated')
           .then(() => {
             expect(verifyIdTokenStub.callCount).to.equal(1)
           })
@@ -68,7 +68,7 @@ describe('Authentication', () => {
       let getTokenInfoStub
 
       beforeEach(() => {
-        getTokenInfoStub = sinon.stub(oauthClientInstance, 'verifyIdToken')
+        getTokenInfoStub = sinon.stub(oauthClientInstance, 'getTokenInfo')
       })
 
       afterEach(() => {
@@ -76,20 +76,22 @@ describe('Authentication', () => {
       })
 
       it('returns a promise with userId when the token is validated successfully', () => {
-        getTokenInfoStub.resolves({ sub: 'testuserid' })
+        getTokenInfoStub.resolves({ sub: 'testuserId' })
 
-        expect(authentication.internal.getUserIdFromTokenInfo('testToken')).to.not.be.rejected
+        return expect(authentication.internal.getUserIdFromTokenInfo('testToken')).to.not.be.rejected
           .then((userId) => {
             expect(getTokenInfoStub.callCount).to.equal(1)
+            expect(getTokenInfoStub).to.have.been.calledWith('testToken')
             expect(userId).to.equal('testuserId')
           })
       })
       it('returns a rejected promise if validation fails', () => {
         getTokenInfoStub.rejects(new Error('not validated'))
 
-        expect(authentication.internal.getUserIdFromTokenInfo('testToken')).to.be.rejectedWith('not validated')
+        return expect(authentication.internal.getUserIdFromTokenInfo('testToken')).to.be.rejectedWith('not validated')
           .then(() => {
             expect(getTokenInfoStub.callCount).to.equal(1)
+            expect(getTokenInfoStub).to.have.been.calledWith('testToken')
           })
       })
     })

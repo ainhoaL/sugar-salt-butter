@@ -207,7 +207,6 @@ module.exports = {
           try {
             numberQuantity = parsing.stringToNumber(quantity)
           } catch (error) {
-            console.log(error)
             throw new Error('Failed to parse quantity for ingredient: ' + ingredient)
           }
 
@@ -223,7 +222,6 @@ module.exports = {
             numberQuantity = parsing.stringToNumber(quantity)
             ingredientObject = { quantity: numberQuantity, name }
           } catch (error) {
-            console.log(error)
             console.log('Failed to parse quantity for ingredient: ' + ingredient + ' - it probably does not have a quantity? - storing without quantity')
             name = ingredient
             ingredientObject = { name }

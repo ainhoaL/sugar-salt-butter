@@ -92,6 +92,14 @@ module.exports = {
     // }
 
     return newQty
+  },
+
+  parseMetricToNonMetric (unit, quantity) {
+    if (unit === 'cup' || unit === 'tbsp' || unit === 'tsp') {
+      return module.exports.numberToFraction(quantity)
+    } else {
+      return quantity
+    }
   }
 
 }

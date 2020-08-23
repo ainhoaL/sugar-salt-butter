@@ -59,7 +59,7 @@ module.exports = {
     const recipePromises = []
     items.forEach((item) => {
       if (!recipesList[item.recipeId]) {
-        recipesList[item.recipeId] = item.servings
+        recipesList[item.recipeId] = { recipe: item.recipeId, servings: item.servings }
         const recipePromise = module.exports.getRecipe(item.recipeId, userId)
         recipePromises.push(recipePromise)
       }
@@ -72,7 +72,7 @@ module.exports = {
               _id: recipe._id,
               title: recipe.title,
               image: recipe.image,
-              servings: recipesList[recipe._id],
+              servings: recipesList[recipe._id].servings,
               href: recipeBaseUrl + '/' + recipe._id
             })
           }

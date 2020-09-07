@@ -86,6 +86,46 @@ module.exports = {
    * @param req {request object}
    * @param res {response object}
    */
+  getAll (req, res) {
+    if (!req.userId) {
+      return res.sendStatus(401) // Not authorized
+    }
+    const limit = req.query.limit ? parseInt(req.query.limit) : 40
+    const skip = req.query.skip ? parseInt(req.query.skip) : 0
+    const sortBy = req.query.sortBy || 'dateCreated'
+    const orderBy = req.query.orderBy || 'desc'
+    const sortObj = {}
+    sortObj[sortBy] = orderBy
+    const filterObj = { userId: req.userId }
+    Object.keys(req.query).forEach((key) => {
+      if ((key !== 'limit') && (key !== 'skip') && (key !== 'sortBy') && (key !== 'orderBy')) {
+        filterObj[key] = req.query[key]
+      }
+    })
+    const results = { count: 0, recipes: [] }
+    return Recipe.find(filterObj).countDocuments()
+      .then(count => {
+        results.count = count
+        if (count > 0) {
+          return Recipe.find(filterObj).sort(sortObj).limit(limit).skip(skip)
+        } else {
+          return res.send(results)
+        }
+      })
+      .then(dbRecipes => {
+        results.recipes = dbRecipes
+        return res.send(results)
+      })
+      .catch(error => {
+        return res.status(500).send(error.message) // TODO: change for custom error message
+      })
+  },
+
+  /**
+   * Get a recipe using the recipe model
+   * @param req {request object}
+   * @param res {response object}
+   */
   get (req, res) {
     if (!req.userId) {
       return res.sendStatus(401) // Not authorized

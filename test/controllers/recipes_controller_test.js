@@ -467,6 +467,203 @@ describe('Recipes controller', () => {
       })
     })
 
+    describe('getAll', () => {
+      let recipeFindStub
+
+      beforeEach(() => {
+        recipeFindStub = sinon.stub(Recipe, 'find')
+      })
+
+      afterEach(() => {
+        recipeFindStub.restore()
+      })
+
+      describe('receives a request but it has no userId', () => {
+        it('does not search for the recipe and returns an error', (done) => {
+          req.userId = null
+
+          res.on('end', () => {
+            expect(recipeFindStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(401)
+            done()
+          })
+          recipesController.getAll(req, res)
+        })
+      })
+
+      describe('receives a request get all recipes', () => {
+        const query = { userId: 'testUserId', limit: 5, skip: 12, sortBy: 'title', orderBy: 'asc', title: 'cake', wantToTry: true }
+        let expectedQuery
+        let expectedSortObj
+        const countStub = sinon.stub()
+        const skipStub = sinon.stub()
+
+        const dbRecipes = [{
+          _id: 'testId1',
+          userId: 'testUserId',
+          url: 'http://testrecipe.com/blah',
+          title: 'vanilla ice cream',
+          ingredients: [{ quantity: null, unit: null, name: 'fake ingredient' }]
+        }, {
+          _id: 'testId2',
+          userId: 'testUserId',
+          url: 'http://testrecipe.com/test1',
+          title: 'strawberry ice cream',
+          ingredients: [{ quantity: '1', unit: 'cup', name: 'cream' }]
+        }]
+
+        beforeEach(() => {
+          expectedQuery = { userId: 'testUserId', title: 'cake', wantToTry: true }
+          expectedSortObj = { title: 'asc' }
+          const findFn = (search, score) => {
+            expect(search).to.deep.equal(expectedQuery)
+            return {
+              countDocuments: countStub,
+              sort: (sortObj) => {
+                expect(sortObj).to.deep.equal(expectedSortObj)
+                return {
+                  limit: () => {
+                    return { skip: skipStub }
+                  }
+                }
+              }
+            }
+          }
+          recipeFindStub.callsFake(findFn)
+        })
+
+        afterEach(() => {
+          recipeFindStub.restore()
+          countStub.reset()
+          skipStub.reset()
+        })
+
+        it('returns results when all query parameters are sent', (done) => {
+          req.query = query
+
+          countStub.resolves(2)
+          skipStub.resolves(dbRecipes)
+
+          res.on('end', () => {
+            expect(recipeFindStub.callCount).to.equal(2)
+            expect(skipStub.callCount).to.equal(1)
+            expect(skipStub).to.have.been.calledWith(12)
+            expect(res._getStatusCode()).to.equal(200)
+            expect(res._getData()).to.deep.equal({
+              count: 2,
+              recipes: dbRecipes
+            })
+            done()
+          })
+
+          recipesController.getAll(req, res)
+        })
+
+        it('returns results when query has no parameters', (done) => {
+          expectedQuery = { userId: 'testUserId' }
+          expectedSortObj = { dateCreated: 'desc' }
+
+          req.query = { userId: 'testUserId' }
+
+          countStub.resolves(2)
+          skipStub.resolves(dbRecipes)
+
+          res.on('end', () => {
+            expect(recipeFindStub.callCount).to.equal(2)
+            expect(skipStub.callCount).to.equal(1)
+            expect(skipStub).to.have.been.calledWith(0)
+            expect(res._getStatusCode()).to.equal(200)
+            expect(res._getData()).to.deep.equal({
+              count: 2,
+              recipes: dbRecipes
+            })
+            done()
+          })
+
+          recipesController.getAll(req, res)
+        })
+
+        context('and getting the number of search results fails', () => {
+          it('returns 500 and the error', (done) => {
+            req.query = query
+
+            countStub.rejects(new Error('Error searching'))
+
+            res.on('end', () => {
+              expect(recipeFindStub.callCount).to.equal(1)
+              expect(skipStub.callCount).to.equal(0)
+              expect(res._getStatusCode()).to.equal(500)
+              expect(res._getData()).to.equal('Error searching')
+              done()
+            })
+            recipesController.getAll(req, res)
+          })
+        })
+
+        context('when there are 0 search results', () => {
+          it('returns empty results', (done) => {
+            req.query = query
+
+            countStub.resolves(0)
+
+            res.on('end', () => {
+              expect(recipeFindStub.callCount).to.equal(1)
+              expect(skipStub.callCount).to.equal(0)
+              expect(res._getStatusCode()).to.equal(200)
+              expect(res._getData()).to.deep.equal({ count: 0, recipes: [] })
+              done()
+            })
+
+            recipesController.getAll(req, res)
+          })
+        })
+
+        context('when there are search results', () => {
+          beforeEach(() => {
+            countStub.resolves(2)
+          })
+
+          it('searches the recipes with the right skip value from query and returns the recipes', (done) => {
+            req.query = query
+
+            skipStub.resolves(dbRecipes)
+
+            res.on('end', () => {
+              expect(recipeFindStub.callCount).to.equal(2)
+              expect(skipStub.callCount).to.equal(1)
+              expect(skipStub).to.have.been.calledWith(12)
+              expect(res._getStatusCode()).to.equal(200)
+              expect(res._getData()).to.deep.equal({
+                count: 2,
+                recipes: dbRecipes
+              })
+              done()
+            })
+
+            recipesController.getAll(req, res)
+          })
+
+          context('and the search fails', () => {
+            it('returns 500 and the error', (done) => {
+              req.query = query
+
+              skipStub.rejects(new Error('Error searching'))
+
+              res.on('end', () => {
+                expect(recipeFindStub.callCount).to.equal(2)
+                expect(skipStub.callCount).to.equal(1)
+                expect(skipStub).to.have.been.calledWith(12)
+                expect(res._getStatusCode()).to.equal(500)
+                expect(res._getData()).to.equal('Error searching')
+                done()
+              })
+              recipesController.getAll(req, res)
+            })
+          })
+        })
+      })
+    })
+
     describe('update', () => {
       let recipeReplaceOneStub
 

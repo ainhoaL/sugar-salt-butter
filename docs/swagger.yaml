@@ -34,6 +34,57 @@ paths:
           description: Unauthorized
         "500":
           description: Internal Server Error
+    get:
+      tags:
+        - recipes
+      summary: Get recipes
+      description: ""
+      operationId: getAllRecipes
+      parameters:
+        - name: url
+          in: query
+          description: Recipe url
+          schema:
+            type: string
+        - name: searchString
+          in: query
+          description: search terms
+          required: true
+          schema:
+            type: string
+        - name: skip
+          in: query
+          description: number of search results to skip
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: max number of search results to return
+          schema:
+            type: string
+        - name: orderBy
+          in: query
+          description: order for results: asc or desc
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          description: recipe field to sort results by
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Recipes found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeSearchResults"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
   "/recipes/{id}":
     get:
       tags:
@@ -90,53 +141,7 @@ paths:
           description: Not Found
         "500":
           description: Internal Server Error
-  /recipes/search:
-    get:
-      tags:
-        - recipes
-      summary: Search for a recipe
-      description: ""
-      operationId: searchRecipe
-      parameters:
-        - name: userId
-          in: query
-          description: User ID
-          required: true
-          schema:
-            type: string
-        - name: url
-          in: query
-          description: Recipe url
-          required: true
-          schema:
-            type: string
-        - name: searchString
-          in: query
-          description: search terms
-          required: true
-          schema:
-            type: string
-        - name: skip
-          in: query
-          description: number of search results to skip
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Recipes found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/RecipeSearchResults"
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: Internal Server Error
-        "501":
-          description: Not Implemented
+
   /lists:
     post:
       tags:

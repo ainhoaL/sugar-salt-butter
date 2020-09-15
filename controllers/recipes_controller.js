@@ -76,13 +76,13 @@ module.exports = {
           results.count = count
           if (count && count > 0) {
             return Recipe.find(filterObj, score).sort(sortObj).limit(limit).skip(skip)
+              .then(dbRecipes => {
+                results.recipes = results.recipes.concat(dbRecipes)
+                return res.send(results)
+              })
           } else {
             return res.send(results)
           }
-        })
-        .then(dbRecipes => {
-          results.recipes = results.recipes.concat(dbRecipes)
-          return res.send(results)
         })
         .catch(error => {
           return res.status(500).send(error.message) // TODO: change for custom error message

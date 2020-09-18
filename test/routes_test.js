@@ -15,7 +15,7 @@ describe('Routes', () => {
     let recipeCreateStub
     let recipesGetStub
     let recipesUpdateStub
-    let recipeSearchStub
+    let recipesGetAllStub
     let verifyStub
 
     const userId = 'user1'
@@ -38,8 +38,8 @@ describe('Routes', () => {
       })
       recipesGetStub = sinon.stub(recipesController, 'get')
       recipesUpdateStub = sinon.stub(recipesController, 'update')
-      recipeSearchStub = sinon.stub(recipesController, 'find')
-      recipeSearchStub.callsFake((req, res) => {
+      recipesGetAllStub = sinon.stub(recipesController, 'getAll')
+      recipesGetAllStub.callsFake((req, res) => {
         return res.send(dbRecipe)
       })
 
@@ -56,7 +56,7 @@ describe('Routes', () => {
       recipeCreateStub.restore()
       recipesGetStub.restore()
       recipesUpdateStub.restore()
-      recipeSearchStub.restore()
+      recipesGetAllStub.restore()
       verifyStub.restore()
     })
 
@@ -70,6 +70,18 @@ describe('Routes', () => {
             expect(response.body).to.deep.equal(dbRecipe)
             done(error)
           })
+      })
+
+      describe('GET', (done) => {
+        it('GET finds a recipe', (done) => {
+          request(app)
+            .get('/api/v1/recipes')
+            .expect(200)
+            .end((error, response) => {
+              expect(response.body).to.deep.equal(dbRecipe)
+              done(error)
+            })
+        })
       })
 
       describe('GET /:id', (done) => {
@@ -146,18 +158,6 @@ describe('Routes', () => {
               })
           })
         })
-      })
-    })
-
-    describe('/api/v1/recipes/search', () => {
-      it('GET finds a recipe', (done) => {
-        request(app)
-          .get('/api/v1/recipes/search?url=http://test&userId=me')
-          .expect(200)
-          .end((error, response) => {
-            expect(response.body).to.deep.equal(dbRecipe)
-            done(error)
-          })
       })
     })
   })

@@ -25,28 +25,38 @@ module.exports = {
   },
 
   /**
-   * Find recipes
+   * Get an array of recipes
+   * accepts query parameters:
+   * - recipe property (title, url, ...) value: performs search by property specified (title=cake)
+   * - searchString: performs text search in title, ingredients and tags (searchString=chocolate)
+   * - sortBy: sorts search results by this property, dateCreated by default (sortBy=title)
+   * - orderBy: orders search results in this order, descending by default (orderBy=asc)
+   * - limit: number of recipes to return, 40 by default (limit=10)
+   * - skip: number of search results to skip, to handle pagination, 0 by default (skip=20)
    * @param req {request object}
    * @param res {response object}
    */
-  find (req, res) {
+  getAll (req, res) {
     if (!req.userId) {
       return res.sendStatus(401) // Not authorized
     }
     if (req.query) {
-      if (req.query.url) { // Search to find a single recipe by url
-        return Recipe.findOne({ url: req.query.url, userId: req.userId })
-          .then(dbRecipe => {
-            if (dbRecipe) {
-              return res.send({ count: 1, recipes: [dbRecipe] })
-            } else {
-              return res.sendStatus(404)
-            }
-          })
-          .catch((error) => {
-            return res.status(500).send(error.message) // TODO: change for custom error message
-          })
-      } else if (req.query.searchString) { // Search to find any recipes matching query elements
+      const limit = req.query.limit ? parseInt(req.query.limit) : 40
+      const skip = req.query.skip ? parseInt(req.query.skip) : 0
+      const sortBy = req.query.sortBy || 'dateCreated'
+      const orderBy = req.query.orderBy || 'desc'
+      const sortObj = {}
+      sortObj[sortBy] = orderBy
+      const filterObj = { userId: req.userId }
+      Object.keys(req.query).forEach((key) => {
+        if ((key !== 'limit') && (key !== 'skip') && (key !== 'sortBy') && (key !== 'orderBy') && (key !== 'searchString')) {
+          filterObj[key] = req.query[key]
+        }
+      })
+      let score
+      const results = { count: 0, recipes: [] }
+
+      if (req.query.searchString) { // Search to find any recipes matching query elements
         const searchWords = req.query.searchString.split(' ')
         let searchString = '"' + searchWords[0]
         let i = 1
@@ -55,29 +65,30 @@ module.exports = {
           i++
         }
         searchString += '"'
-        const skip = req.query.skip ? parseInt(req.query.skip) : 0
-        const results = { count: 0, recipes: [] }
-        return Recipe.find({ $text: { $search: searchString }, userId: req.userId }, { score: { $meta: 'textScore' } }).countDocuments()
-          .then(count => {
-            results.count = count
-            if (count > 0) {
-              return Recipe.find({ $text: { $search: searchString }, userId: req.userId }, { score: { $meta: 'textScore' } }).sort({ score: { $meta: 'textScore' } }).limit(40).skip(skip)
-            } else {
-              return res.send(results)
-            }
-          })
-          .then(dbRecipes => {
-            results.recipes = dbRecipes
-            return res.send(results)
-          })
-          .catch(error => {
-            return res.status(500).send(error.message) // TODO: change for custom error message
-          })
-      } else {
-        res.sendStatus(501)
+        filterObj.$text = { $search: searchString }
+        const textScore = { $meta: 'textScore' }
+        score = { score: textScore }
+        sortObj.score = textScore
       }
+
+      return Recipe.find(filterObj, score).countDocuments()
+        .then(count => {
+          results.count = count
+          if (count && count > 0) {
+            return Recipe.find(filterObj, score).sort(sortObj).limit(limit).skip(skip)
+              .then(dbRecipes => {
+                results.recipes = results.recipes.concat(dbRecipes)
+                return res.send(results)
+              })
+          } else {
+            return res.send(results)
+          }
+        })
+        .catch(error => {
+          return res.status(500).send(error.message) // TODO: change for custom error message
+        })
     } else {
-      return res.sendStatus(501)
+      return res.sendStatus(400)
     }
   },
 

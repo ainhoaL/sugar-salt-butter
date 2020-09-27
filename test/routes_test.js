@@ -40,7 +40,7 @@ describe('Routes', () => {
       recipesUpdateStub = sinon.stub(recipesController, 'update')
       recipesGetAllStub = sinon.stub(recipesController, 'getAll')
       recipesGetAllStub.callsFake((req, res) => {
-        return res.send(dbRecipe)
+        return res.send({ recipes: [dbRecipe], count: 1 })
       })
 
       verifyStub = sinon.stub(authentication, 'verify')
@@ -73,12 +73,12 @@ describe('Routes', () => {
       })
 
       describe('GET', (done) => {
-        it('GET finds a recipe', (done) => {
+        it('GET finds recipes', (done) => {
           request(app)
             .get('/api/v1/recipes')
             .expect(200)
             .end((error, response) => {
-              expect(response.body).to.deep.equal(dbRecipe)
+              expect(response.body).to.deep.equal({ recipes: [dbRecipe], count: 1 })
               done(error)
             })
         })
@@ -157,6 +157,48 @@ describe('Routes', () => {
                 done(error)
               })
           })
+        })
+      })
+    })
+  })
+
+  describe('tags', () => {
+    let getTagsStub
+    let verifyStub
+
+    const userId = 'user1'
+    const tagsArray = [{ _id: 'meat', count: 1 }, { _id: 'vegetarian', count: 20 }]
+
+    beforeEach(() => {
+      getTagsStub = sinon.stub(recipesController, 'getTags')
+      getTagsStub.callsFake((req, res) => {
+        return res.send(tagsArray)
+      })
+
+      verifyStub = sinon.stub(authentication, 'verify')
+      verifyStub.callsFake((req, res, next) => {
+        req.userId = userId
+        return next()
+      })
+
+      app = require('../app.js')
+    })
+
+    afterEach(() => {
+      getTagsStub.restore()
+      verifyStub.restore()
+    })
+
+    describe('/api/v1/tags', () => {
+      describe('GET', (done) => {
+        it('returns tags array', (done) => {
+          request(app)
+            .get('/api/v1/tags')
+            .expect(200)
+            .end((error, response) => {
+              expect(response.body).to.deep.equal(tagsArray)
+              done(error)
+            })
         })
       })
     })

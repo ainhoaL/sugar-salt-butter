@@ -38,6 +38,7 @@ module.exports = {
     value = Math.floor(numerator) + '/' + Math.floor(denominator)
     if (value === '333/1000') value = '1/3'
     if (value === '333/500') value = '2/3'
+    if (value === '667/1000') value = '2/3'
     if (base) {
       value = base + ' ' + value
     }

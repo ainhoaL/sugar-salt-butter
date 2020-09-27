@@ -782,6 +782,85 @@ describe('Recipes controller', () => {
         })
       })
     })
+
+    describe('getTags', () => {
+      let recipeAggregateStub
+      const expectedAggregateParams = [{ $match: { userId: 'testUserId' } }, { $unwind: '$tags' }, { $group: { _id: '$tags', count: { $sum: 1 } } }, { $sort: { count: -1 } }]
+
+      beforeEach(() => {
+        recipeAggregateStub = sinon.stub(Recipe, 'aggregate')
+      })
+
+      afterEach(() => {
+        recipeAggregateStub.restore()
+      })
+
+      describe('receives a valid request', () => {
+        describe('and there are tags', () => {
+          it('returns an array of tags', (done) => {
+            const tagsArray = [{ _id: 'meat', count: 3 }, { _id: 'vegetarian', count: 20 }]
+            recipeAggregateStub.returns(Promise.resolve(tagsArray))
+
+            res.on('end', () => {
+              expect(recipeAggregateStub.callCount).to.equal(1)
+              expect(recipeAggregateStub).to.have.been.calledWith(expectedAggregateParams)
+              expect(res._getStatusCode()).to.equal(200)
+              expect(res._getData()).to.deep.equal(tagsArray)
+              done()
+            })
+
+            recipesController.getTags(req, res)
+          })
+        })
+
+        describe('but there are no tags', () => {
+          it('returns empty array of tags', (done) => {
+            recipeAggregateStub.returns(Promise.resolve([]))
+
+            res.on('end', () => {
+              expect(recipeAggregateStub.callCount).to.equal(1)
+              expect(recipeAggregateStub).to.have.been.calledWith(expectedAggregateParams)
+              expect(res._getStatusCode()).to.equal(200)
+              expect(res._getData()).to.deep.equal([])
+              done()
+            })
+
+            recipesController.getTags(req, res)
+          })
+        })
+
+        describe('and the call to db fails', () => {
+          it('returns 500 and the error', (done) => {
+            recipeAggregateStub.rejects(new Error('Error searching'))
+
+            res.on('end', () => {
+              expect(recipeAggregateStub.callCount).to.equal(1)
+              expect(recipeAggregateStub).to.have.been.calledWith(expectedAggregateParams)
+              expect(res._getStatusCode()).to.equal(500)
+              expect(res._getData()).to.equal('Error searching')
+              done()
+            })
+
+            recipesController.getTags(req, res)
+          })
+        })
+      })
+
+      describe('receives a request without userId id', () => {
+        it('returns a 400 error', (done) => {
+          req.params = { }
+          req.userId = null
+
+          res.on('end', () => {
+            expect(recipeAggregateStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(401)
+            done()
+          })
+
+          recipesController.getTags(req, res)
+        })
+      })
+    })
   })
 
   describe('parseIngredients', () => {

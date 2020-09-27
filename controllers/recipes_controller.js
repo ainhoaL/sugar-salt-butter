@@ -149,6 +149,24 @@ module.exports = {
   },
 
   /**
+   * Get list of tags and the number of recipes they appear in
+   * @param req {request object}
+   * @param res {response object}
+   */
+  getTags (req, res) {
+    if (!req.userId) {
+      return res.sendStatus(401) // Not authorized
+    }
+    return Recipe.aggregate([{ $match: { userId: req.userId } }, { $unwind: '$tags' }, { $group: { _id: '$tags', count: { $sum: 1 } } }, { $sort: { count: -1 } }]) // TODO: get tags per user!!!!
+      .then(tags => {
+        return res.status(200).send(tags)
+      })
+      .catch(error => {
+        return res.status(500).send(error.message) // TODO: change for custom error message
+      })
+  },
+
+  /**
    * Given a multiline string with a list of ingredients it returns a standardized array of ingredients
    * It standardizes the ingredients units so all ingredients are always stored with same units for easier conversion later on
    * It also groups ingredients by sections. A group name starts with #. Any ingredient after it will belong to that group

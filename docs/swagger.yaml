@@ -280,6 +280,20 @@ paths:
           description: Unauthorized
         "500":
           description: Internal Server Error
+  /tags:
+    get:
+      tags:
+        - tags
+      summary: Get all tags used in recipes
+      description: ""
+      operationId: getAllTags
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagsInRecipes"
 servers:
   - url: http://localhost:3050/api
 components:
@@ -508,3 +522,16 @@ components:
         recipeServings:
           type: integer
           example: 4
+    TagsInRecipes:
+      type: array
+      items:
+            $ref: "#/components/schemas/TagWithCount"
+    TagWithCount:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: vegetarian
+        count:
+          type: integer
+          example: 20

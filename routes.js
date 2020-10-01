@@ -10,6 +10,8 @@ router.get('/api/v1/recipes', (req, res) => RecipesController.getAll(req, res)) 
 router.get('/api/v1/recipes/:id', (req, res) => RecipesController.get(req, res))
 router.put('/api/v1/recipes/:id', (req, res) => RecipesController.update(req, res))
 
+router.get('/api/v1/tags', (req, res) => RecipesController.getTags(req, res))
+
 router.post('/api/v1/lists', (req, res) => ListsController.create(req, res))
 router.get('/api/v1/lists/:id', (req, res) => ListsController.get(req, res))
 router.get('/api/v1/lists', (req, res) => ListsController.getAll(req, res))

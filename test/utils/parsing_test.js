@@ -36,6 +36,9 @@ describe('parsing', () => {
       it('returns 2/3 if the value is 0.666', () => {
         expect(parsing.numberToFraction(0.666)).to.equal('2/3')
       })
+      it('returns 2/3 if the value is 0.667', () => {
+        expect(parsing.numberToFraction(0.667)).to.equal('2/3')
+      })
       it('returns 5 1/2 if the value is 5.5', () => {
         expect(parsing.numberToFraction(5.5)).to.equal('5 1/2')
       })

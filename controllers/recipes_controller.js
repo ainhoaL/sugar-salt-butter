@@ -1,5 +1,6 @@
 const Recipe = require('../models/recipe')
 const parsing = require('../utils/parsing')
+const ingredientsClassifier = require('../utils/ingredients_classifier')
 
 module.exports = {
 
@@ -44,7 +45,7 @@ module.exports = {
       const limit = req.query.limit ? parseInt(req.query.limit) : 40
       const skip = req.query.skip ? parseInt(req.query.skip) : 0
       const sortBy = req.query.sortBy || 'dateCreated'
-      const orderBy = req.query.orderBy || 'desc'
+      const orderBy = req.query.orderBy ? parseInt(req.query.orderBy) : -1
       const sortObj = {}
       sortObj[sortBy] = orderBy
       const filterObj = { userId: req.userId }
@@ -55,6 +56,36 @@ module.exports = {
       })
       let score
       const results = { count: 0, recipes: [] }
+
+      if (req.query.season) {
+        let seasonMonth = parseInt(req.query.season)
+        if (isNaN(seasonMonth)) {
+          const nowDate = new Date()
+          seasonMonth = nowDate.getMonth() + 1
+        }
+
+        return Recipe.aggregate([{
+          $match: { userId: req.userId }
+        },
+        {
+          $lookup: {
+            from: 'ingredients',
+            localField: 'ingredients.ingredientMatch',
+            foreignField: '_id',
+            as: 'ingredientsInfo'
+          }
+        },
+        {
+          $match: { 'ingredientsInfo.months': seasonMonth }
+        }, { $skip: skip }, { $limit: limit }, { $sort: sortObj }])
+          .then(recipes => {
+            results.recipes = results.recipes.concat(recipes)
+            return res.status(200).send(results)
+          })
+          .catch(error => {
+            return res.status(500).send(error.message) // TODO: change for custom error message
+          })
+      }
 
       if (req.query.searchString) { // Search to find any recipes matching query elements
         const searchWords = req.query.searchString.split(' ')
@@ -157,7 +188,7 @@ module.exports = {
     if (!req.userId) {
       return res.sendStatus(401) // Not authorized
     }
-    return Recipe.aggregate([{ $match: { userId: req.userId } }, { $unwind: '$tags' }, { $group: { _id: '$tags', count: { $sum: 1 } } }, { $sort: { count: -1 } }]) // TODO: get tags per user!!!!
+    return Recipe.aggregate([{ $match: { userId: req.userId } }, { $unwind: '$tags' }, { $group: { _id: '$tags', count: { $sum: 1 } } }, { $sort: { count: -1 } }])
       .then(tags => {
         return res.status(200).send(tags)
       })
@@ -273,6 +304,14 @@ module.exports = {
       const tags = recipe.tags.split(',')
       recipe.tags = tags.map(s => s.trim())
     }
+
+    let ingredientClasses
+    recipe.ingredients.forEach((ingredient) => {
+      ingredientClasses = ingredientsClassifier.getClassifications(ingredient.name)
+      if (ingredientClasses[0].value >= 1.9 * ingredientClasses[1].value) { // TODO: DOES 'Tablespoon' unit not work anymore in parsing???
+        ingredient.ingredientMatch = ingredientClasses[0].label
+      }
+    })
 
     return recipe
   }

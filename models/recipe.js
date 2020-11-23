@@ -15,6 +15,9 @@ const RecipeIngredientSchema = new Schema({
   },
   group: {
     type: String
+  },
+  ingredientMatch: {
+    type: String
   }
 })
 

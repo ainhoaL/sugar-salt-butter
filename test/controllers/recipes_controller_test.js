@@ -201,6 +201,85 @@ describe('Recipes controller', () => {
       })
     })
 
+    describe('deleteRecipe', () => {
+      let recipeDeleteOneStub
+
+      beforeEach(() => {
+        recipeDeleteOneStub = sinon.stub(Recipe, 'deleteOne')
+      })
+
+      afterEach(() => {
+        recipeDeleteOneStub.restore()
+      })
+
+      describe('receives a request with an id', () => {
+        describe('and the recipe exists', () => {
+          it('returns the recipe', (done) => {
+            req.params = { id: 'testId' }
+
+            recipeDeleteOneStub.returns(Promise.resolve())
+
+            res.on('end', () => {
+              expect(recipeDeleteOneStub.callCount).to.equal(1)
+              expect(recipeDeleteOneStub).to.have.been.calledWith({ _id: 'testId' })
+              expect(res._getStatusCode()).to.equal(204)
+              done()
+            })
+
+            recipesController.deleteRecipe(req, res)
+          })
+        })
+
+        context('and the call to db fails', () => {
+          it('returns 500 and the error', (done) => {
+            req.params = { id: 'testId' }
+
+            recipeDeleteOneStub.rejects(new Error('Error deleting'))
+
+            res.on('end', () => {
+              expect(recipeDeleteOneStub.callCount).to.equal(1)
+              expect(recipeDeleteOneStub).to.have.been.calledWith({ _id: 'testId' })
+              expect(res._getStatusCode()).to.equal(500)
+              expect(res._getData()).to.equal('Error deleting')
+              done()
+            })
+
+            recipesController.deleteRecipe(req, res)
+          })
+        })
+      })
+
+      describe('receives a request without recipe id', () => {
+        it('returns a 400 error', (done) => {
+          req.params = { }
+
+          res.on('end', () => {
+            expect(recipeDeleteOneStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(400)
+            expect(res._getData()).to.deep.equal('missing recipe ID')
+            done()
+          })
+
+          recipesController.deleteRecipe(req, res)
+        })
+      })
+
+      describe('receives a request without userId id', () => {
+        it('returns a 400 error', (done) => {
+          req.params = { }
+          req.userId = null
+
+          res.on('end', () => {
+            expect(recipeDeleteOneStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(401)
+            done()
+          })
+
+          recipesController.deleteRecipe(req, res)
+        })
+      })
+    })
+
     describe('getAll', () => {
       let recipeFindStub
 

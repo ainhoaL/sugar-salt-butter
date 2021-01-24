@@ -14,6 +14,7 @@ describe('Routes', () => {
   describe('recipes', () => {
     let recipeCreateStub
     let recipesGetStub
+    let recipesDeleteStub
     let recipesUpdateStub
     let recipesGetAllStub
     let verifyStub
@@ -37,6 +38,7 @@ describe('Routes', () => {
         return res.send(dbRecipe)
       })
       recipesGetStub = sinon.stub(recipesController, 'get')
+      recipesDeleteStub = sinon.stub(recipesController, 'deleteRecipe')
       recipesUpdateStub = sinon.stub(recipesController, 'update')
       recipesGetAllStub = sinon.stub(recipesController, 'getAll')
       recipesGetAllStub.callsFake((req, res) => {
@@ -55,6 +57,7 @@ describe('Routes', () => {
     afterEach(() => {
       recipeCreateStub.restore()
       recipesGetStub.restore()
+      recipesDeleteStub.restore()
       recipesUpdateStub.restore()
       recipesGetAllStub.restore()
       verifyStub.restore()
@@ -114,6 +117,25 @@ describe('Routes', () => {
             request(app)
               .get('/api/v1/recipes/33')
               .expect(404)
+              .end((error, response) => {
+                done(error)
+              })
+          })
+        })
+      })
+
+      describe('DELETE /:id', (done) => {
+        describe('with an existing id', () => {
+          beforeEach(() => {
+            recipesDeleteStub.callsFake((req, res) => {
+              return res.sendStatus(204)
+            })
+          })
+
+          it('returns 204', (done) => {
+            request(app)
+              .delete('/api/v1/recipes/21')
+              .expect(204)
               .end((error, response) => {
                 done(error)
               })

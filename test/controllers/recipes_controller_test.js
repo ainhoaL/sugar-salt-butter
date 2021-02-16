@@ -111,7 +111,7 @@ describe('Recipes controller', () => {
       describe('receives a request with an id', () => {
         const dbRecipe = {
           _id: 'testId',
-          userId: 'user1',
+          userId: 'testUserId',
           title: 'test cake',
           ingredients: [{ quantity: null, unit: null, name: 'fake ingredient' }]
         }
@@ -124,7 +124,7 @@ describe('Recipes controller', () => {
 
             res.on('end', () => {
               expect(recipeFindOneStub.callCount).to.equal(1)
-              expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'testId' })
+              expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' })
               expect(res._getStatusCode()).to.equal(200)
               expect(res._getData()).to.deep.equal(dbRecipe)
               done()
@@ -142,7 +142,7 @@ describe('Recipes controller', () => {
 
             res.on('end', () => {
               expect(recipeFindOneStub.callCount).to.equal(1)
-              expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'norecipe' })
+              expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'norecipe', userId: 'testUserId' })
               expect(res._getStatusCode()).to.equal(404)
               done()
             })
@@ -159,7 +159,7 @@ describe('Recipes controller', () => {
 
             res.on('end', () => {
               expect(recipeFindOneStub.callCount).to.equal(1)
-              expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'testId' })
+              expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' })
               expect(res._getStatusCode()).to.equal(500)
               expect(res._getData()).to.equal('Error searching')
               done()
@@ -214,14 +214,14 @@ describe('Recipes controller', () => {
 
       describe('receives a request with an id', () => {
         describe('and the recipe exists', () => {
-          it('returns the recipe', (done) => {
+          it('returns 204', (done) => {
             req.params = { id: 'testId' }
 
-            recipeDeleteOneStub.returns(Promise.resolve())
+            recipeDeleteOneStub.resolves()
 
             res.on('end', () => {
               expect(recipeDeleteOneStub.callCount).to.equal(1)
-              expect(recipeDeleteOneStub).to.have.been.calledWith({ _id: 'testId' })
+              expect(recipeDeleteOneStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' })
               expect(res._getStatusCode()).to.equal(204)
               done()
             })
@@ -238,7 +238,7 @@ describe('Recipes controller', () => {
 
             res.on('end', () => {
               expect(recipeDeleteOneStub.callCount).to.equal(1)
-              expect(recipeDeleteOneStub).to.have.been.calledWith({ _id: 'testId' })
+              expect(recipeDeleteOneStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' })
               expect(res._getStatusCode()).to.equal(500)
               expect(res._getData()).to.equal('Error deleting')
               done()
@@ -766,7 +766,7 @@ describe('Recipes controller', () => {
 
             res.on('end', () => {
               expect(recipeReplaceOneStub.callCount).to.equal(1)
-              expect(recipeReplaceOneStub).to.have.been.calledWith({ _id: 'testId' })
+              expect(recipeReplaceOneStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' })
               expect(res._getStatusCode()).to.equal(204)
               done()
             })
@@ -784,7 +784,7 @@ describe('Recipes controller', () => {
 
             res.on('end', () => {
               expect(recipeReplaceOneStub.callCount).to.equal(1)
-              expect(recipeReplaceOneStub).to.have.been.calledWith({ _id: 'norecipe' })
+              expect(recipeReplaceOneStub).to.have.been.calledWith({ _id: 'norecipe', userId: 'testUserId' })
               expect(res._getStatusCode()).to.equal(404)
               done()
             })
@@ -802,7 +802,7 @@ describe('Recipes controller', () => {
 
             res.on('end', () => {
               expect(recipeReplaceOneStub.callCount).to.equal(1)
-              expect(recipeReplaceOneStub).to.have.been.calledWith({ _id: 'testId' })
+              expect(recipeReplaceOneStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' })
               expect(res._getStatusCode()).to.equal(500)
               expect(res._getData()).to.equal('Error searching')
               done()

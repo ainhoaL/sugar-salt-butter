@@ -228,10 +228,12 @@ describe('Routes', () => {
 
   describe('lists', () => {
     let listsGetStub
+    let listsDeleteStub
     let listsCreateStub
     let listsGetAllStub
     let addRecipeToListStub
     let deleteRecipeFromListStub
+    let deleteItemFromListStub
     let verifyStub
 
     const userId = 'user1'
@@ -263,6 +265,7 @@ describe('Routes', () => {
         return res.send(dbList)
       })
       listsGetStub = sinon.stub(listsController, 'get')
+      listsDeleteStub = sinon.stub(listsController, 'deleteList')
       listsGetAllStub = sinon.stub(listsController, 'getAll')
       listsGetAllStub.callsFake((req, res) => {
         return res.send(dbTestLists)
@@ -273,6 +276,10 @@ describe('Routes', () => {
       })
       deleteRecipeFromListStub = sinon.stub(listsController, 'deleteRecipeFromList')
       deleteRecipeFromListStub.callsFake((req, res) => {
+        return res.sendStatus(204)
+      })
+      deleteItemFromListStub = sinon.stub(listsController, 'deleteItemFromList')
+      deleteItemFromListStub.callsFake((req, res) => {
         return res.sendStatus(204)
       })
 
@@ -288,9 +295,11 @@ describe('Routes', () => {
     afterEach(() => {
       listsCreateStub.restore()
       listsGetStub.restore()
+      listsDeleteStub.restore()
       listsGetAllStub.restore()
       addRecipeToListStub.restore()
       deleteRecipeFromListStub.restore()
+      deleteItemFromListStub.restore()
       verifyStub.restore()
     })
 
@@ -352,6 +361,25 @@ describe('Routes', () => {
           })
         })
       })
+
+      describe('DELETE /:id', (done) => {
+        describe('with an existing id', () => {
+          beforeEach(() => {
+            listsDeleteStub.callsFake((req, res) => {
+              return res.sendStatus(204)
+            })
+          })
+
+          it('returns 204', (done) => {
+            request(app)
+              .delete('/api/v1/lists/21')
+              .expect(204)
+              .end((error, response) => {
+                done(error)
+              })
+          })
+        })
+      })
     })
 
     describe('/api/v1/lists/:id/recipes', () => {
@@ -368,6 +396,17 @@ describe('Routes', () => {
       it('DELETE removes a recipe from a list', (done) => {
         request(app)
           .delete('/api/v1/lists/list1/recipes/recipe1')
+          .expect(204)
+          .end((error, response) => {
+            done(error)
+          })
+      })
+    })
+
+    describe('/api/v1/lists/:id/items', () => {
+      it('DELETE removes an item from a list', (done) => {
+        request(app)
+          .delete('/api/v1/lists/list1/items/item1')
           .expect(204)
           .end((error, response) => {
             done(error)

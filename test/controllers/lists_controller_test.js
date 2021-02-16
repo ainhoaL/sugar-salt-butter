@@ -367,6 +367,85 @@ describe('Lists controller', () => {
       })
     })
 
+    describe('deleteList', () => {
+      let listDeleteOneStub
+
+      beforeEach(() => {
+        listDeleteOneStub = sinon.stub(List, 'deleteOne')
+      })
+
+      afterEach(() => {
+        listDeleteOneStub.restore()
+      })
+
+      describe('receives a request with an id', () => {
+        describe('and the list exists', () => {
+          it('returns 204', (done) => {
+            req.params = { id: 'testId' }
+
+            listDeleteOneStub.resolves()
+
+            res.on('end', () => {
+              expect(listDeleteOneStub.callCount).to.equal(1)
+              expect(listDeleteOneStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' })
+              expect(res._getStatusCode()).to.equal(204)
+              done()
+            })
+
+            listsController.deleteList(req, res)
+          })
+        })
+
+        context('and the call to db fails', () => {
+          it('returns 500 and the error', (done) => {
+            req.params = { id: 'testId' }
+
+            listDeleteOneStub.rejects(new Error('Error searching'))
+
+            res.on('end', () => {
+              expect(listDeleteOneStub.callCount).to.equal(1)
+              expect(listDeleteOneStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' })
+              expect(res._getStatusCode()).to.equal(500)
+              expect(res._getData()).to.equal('Error searching')
+              done()
+            })
+
+            listsController.deleteList(req, res)
+          })
+        })
+      })
+
+      describe('receives a request without list id', () => {
+        it('returns a 400 error', (done) => {
+          req.params = { }
+
+          res.on('end', () => {
+            expect(listDeleteOneStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(400)
+            expect(res._getData()).to.deep.equal('missing list ID')
+            done()
+          })
+
+          listsController.deleteList(req, res)
+        })
+      })
+
+      describe('receives a request without userId id', () => {
+        it('returns a 400 error', (done) => {
+          req.params = { }
+          req.userId = null
+
+          res.on('end', () => {
+            expect(listDeleteOneStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(401)
+            done()
+          })
+
+          listsController.deleteList(req, res)
+        })
+      })
+    })
+
     describe('getAll', () => {
       let listFindStub
 
@@ -490,7 +569,7 @@ describe('Lists controller', () => {
 
           res.on('end', () => {
             expect(listUpdateStub.callCount).to.equal(1)
-            expect(listUpdateStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' }, { $pull: { items: { recipeId: { $in: ['recipe1'] } } } })
+            expect(listUpdateStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' }, { $pull: { items: { recipeId: 'recipe1' } } })
             expect(res._getStatusCode()).to.equal(204)
             done()
           })
@@ -506,7 +585,7 @@ describe('Lists controller', () => {
 
             res.on('end', () => {
               expect(listUpdateStub.callCount).to.equal(1)
-              expect(listUpdateStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' }, { $pull: { items: { recipeId: { $in: ['recipe1'] } } } })
+              expect(listUpdateStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' }, { $pull: { items: { recipeId: 'recipe1' } } })
               expect(res._getStatusCode()).to.equal(500)
               expect(res._getData()).to.equal('Error deleting')
               done()
@@ -534,7 +613,7 @@ describe('Lists controller', () => {
         })
       })
 
-      describe('receives a request without a list id', () => {
+      describe('receives a request without a recipe id', () => {
         it('returns a 400 error', (done) => {
           res.on('end', () => {
             expect(listUpdateStub.callCount).to.equal(0)
@@ -806,6 +885,108 @@ describe('Lists controller', () => {
           })
 
           listsController.addRecipeToList(req, res)
+        })
+      })
+    })
+
+    describe('deleteItemFromList', () => {
+      let listUpdateStub
+
+      beforeEach(() => {
+        listUpdateStub = sinon.stub(List, 'update')
+      })
+
+      afterEach(() => {
+        listUpdateStub.restore()
+      })
+
+      describe('receives a valid request', () => {
+        const dbList = {
+          _id: 'testId',
+          userId: 'testUserId',
+          title: 'test shopping list',
+          dateCreated: '12/04',
+          dateLastEdited: '12/08',
+          items: [
+            { quantity: 2, unit: 'cup', name: 'fake ingredient', recipeId: 'recipe2' }
+          ]
+        }
+
+        it('deletes item from list', (done) => {
+          listUpdateStub.resolves(dbList)
+
+          res.on('end', () => {
+            expect(listUpdateStub.callCount).to.equal(1)
+            expect(listUpdateStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' }, { $pull: { items: { _id: 'item1' } } })
+            expect(res._getStatusCode()).to.equal(204)
+            done()
+          })
+
+          req.params = { id: 'testId', itemId: 'item1' }
+
+          listsController.deleteItemFromList(req, res)
+        })
+
+        context('and the call to db fails', () => {
+          it('returns 500 and the error', (done) => {
+            listUpdateStub.rejects(new Error('Error deleting'))
+
+            res.on('end', () => {
+              expect(listUpdateStub.callCount).to.equal(1)
+              expect(listUpdateStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' }, { $pull: { items: { _id: 'item1' } } })
+              expect(res._getStatusCode()).to.equal(500)
+              expect(res._getData()).to.equal('Error deleting')
+              done()
+            })
+
+            req.params = { id: 'testId', itemId: 'item1' }
+
+            listsController.deleteItemFromList(req, res)
+          })
+        })
+      })
+
+      describe('receives a request without a list id', () => {
+        it('returns a 400 error', (done) => {
+          res.on('end', () => {
+            expect(listUpdateStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(400)
+            expect(res._getData()).to.deep.equal('missing list ID or item ID')
+            done()
+          })
+
+          req.params = { itemId: 'item1' }
+
+          listsController.deleteItemFromList(req, res)
+        })
+      })
+
+      describe('receives a request without an item id', () => {
+        it('returns a 400 error', (done) => {
+          res.on('end', () => {
+            expect(listUpdateStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(400)
+            expect(res._getData()).to.deep.equal('missing list ID or item ID')
+            done()
+          })
+
+          req.params = { id: 'testId' }
+
+          listsController.deleteItemFromList(req, res)
+        })
+      })
+
+      describe('receives a request without userId id', () => {
+        it('returns a 400 error', (done) => {
+          req.userId = null
+
+          res.on('end', () => {
+            expect(listUpdateStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(401)
+            done()
+          })
+
+          listsController.deleteItemFromList(req, res)
         })
       })
     })

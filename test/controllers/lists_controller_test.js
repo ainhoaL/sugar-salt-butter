@@ -430,8 +430,8 @@ describe('Lists controller', () => {
         })
       })
 
-      describe('receives a request without userId id', () => {
-        it('returns a 400 error', (done) => {
+      describe('receives a request without userId', () => {
+        it('returns a 401 error', (done) => {
           req.params = { }
           req.userId = null
 
@@ -628,8 +628,8 @@ describe('Lists controller', () => {
         })
       })
 
-      describe('receives a request without userId id', () => {
-        it('returns a 400 error', (done) => {
+      describe('receives a request without userId', () => {
+        it('returns a 401 error', (done) => {
           req.userId = null
 
           res.on('end', () => {

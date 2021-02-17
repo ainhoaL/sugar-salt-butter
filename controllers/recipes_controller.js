@@ -34,7 +34,7 @@ module.exports = {
       return res.sendStatus(401) // Not authorized
     }
     if (req.params.id) {
-      return Recipe.deleteOne({ _id: req.params.id })
+      return Recipe.deleteOne({ _id: req.params.id, userId: req.userId })
         .then(() => {
           res.sendStatus(204)
         })
@@ -124,7 +124,7 @@ module.exports = {
       return res.sendStatus(401) // Not authorized
     }
     if (req.params.id) {
-      return Recipe.findOne({ _id: req.params.id })
+      return Recipe.findOne({ _id: req.params.id, userId: req.userId })
         .then(dbRecipe => {
           if (dbRecipe) {
             res.send(dbRecipe)
@@ -154,7 +154,7 @@ module.exports = {
       recipe = module.exports.processRecipe(recipe)
       recipe.userId = req.userId
 
-      return Recipe.replaceOne({ _id: req.params.id }, recipe)
+      return Recipe.replaceOne({ _id: req.params.id, userId: req.userId }, recipe)
         .then(dbRecipe => {
           if (dbRecipe) {
             return res.sendStatus(204)

@@ -111,7 +111,7 @@ describe('Recipes controller', () => {
       describe('receives a request with an id', () => {
         const dbRecipe = {
           _id: 'testId',
-          userId: 'user1',
+          userId: 'testUserId',
           title: 'test cake',
           ingredients: [{ quantity: null, unit: null, name: 'fake ingredient' }]
         }
@@ -124,7 +124,7 @@ describe('Recipes controller', () => {
 
             res.on('end', () => {
               expect(recipeFindOneStub.callCount).to.equal(1)
-              expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'testId' })
+              expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' })
               expect(res._getStatusCode()).to.equal(200)
               expect(res._getData()).to.deep.equal(dbRecipe)
               done()
@@ -142,7 +142,7 @@ describe('Recipes controller', () => {
 
             res.on('end', () => {
               expect(recipeFindOneStub.callCount).to.equal(1)
-              expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'norecipe' })
+              expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'norecipe', userId: 'testUserId' })
               expect(res._getStatusCode()).to.equal(404)
               done()
             })
@@ -159,7 +159,7 @@ describe('Recipes controller', () => {
 
             res.on('end', () => {
               expect(recipeFindOneStub.callCount).to.equal(1)
-              expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'testId' })
+              expect(recipeFindOneStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' })
               expect(res._getStatusCode()).to.equal(500)
               expect(res._getData()).to.equal('Error searching')
               done()
@@ -197,6 +197,85 @@ describe('Recipes controller', () => {
           })
 
           recipesController.get(req, res)
+        })
+      })
+    })
+
+    describe('deleteRecipe', () => {
+      let recipeDeleteOneStub
+
+      beforeEach(() => {
+        recipeDeleteOneStub = sinon.stub(Recipe, 'deleteOne')
+      })
+
+      afterEach(() => {
+        recipeDeleteOneStub.restore()
+      })
+
+      describe('receives a request with an id', () => {
+        describe('and the recipe exists', () => {
+          it('returns 204', (done) => {
+            req.params = { id: 'testId' }
+
+            recipeDeleteOneStub.resolves()
+
+            res.on('end', () => {
+              expect(recipeDeleteOneStub.callCount).to.equal(1)
+              expect(recipeDeleteOneStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' })
+              expect(res._getStatusCode()).to.equal(204)
+              done()
+            })
+
+            recipesController.deleteRecipe(req, res)
+          })
+        })
+
+        context('and the call to db fails', () => {
+          it('returns 500 and the error', (done) => {
+            req.params = { id: 'testId' }
+
+            recipeDeleteOneStub.rejects(new Error('Error deleting'))
+
+            res.on('end', () => {
+              expect(recipeDeleteOneStub.callCount).to.equal(1)
+              expect(recipeDeleteOneStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' })
+              expect(res._getStatusCode()).to.equal(500)
+              expect(res._getData()).to.equal('Error deleting')
+              done()
+            })
+
+            recipesController.deleteRecipe(req, res)
+          })
+        })
+      })
+
+      describe('receives a request without recipe id', () => {
+        it('returns a 400 error', (done) => {
+          req.params = { }
+
+          res.on('end', () => {
+            expect(recipeDeleteOneStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(400)
+            expect(res._getData()).to.deep.equal('missing recipe ID')
+            done()
+          })
+
+          recipesController.deleteRecipe(req, res)
+        })
+      })
+
+      describe('receives a request without userId id', () => {
+        it('returns a 400 error', (done) => {
+          req.params = { }
+          req.userId = null
+
+          res.on('end', () => {
+            expect(recipeDeleteOneStub.callCount).to.equal(0)
+            expect(res._getStatusCode()).to.equal(401)
+            done()
+          })
+
+          recipesController.deleteRecipe(req, res)
         })
       })
     })
@@ -725,7 +804,7 @@ describe('Recipes controller', () => {
 
             res.on('end', () => {
               expect(recipeReplaceOneStub.callCount).to.equal(1)
-              expect(recipeReplaceOneStub).to.have.been.calledWith({ _id: 'testId' })
+              expect(recipeReplaceOneStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' })
               expect(res._getStatusCode()).to.equal(204)
               done()
             })
@@ -743,7 +822,7 @@ describe('Recipes controller', () => {
 
             res.on('end', () => {
               expect(recipeReplaceOneStub.callCount).to.equal(1)
-              expect(recipeReplaceOneStub).to.have.been.calledWith({ _id: 'norecipe' })
+              expect(recipeReplaceOneStub).to.have.been.calledWith({ _id: 'norecipe', userId: 'testUserId' })
               expect(res._getStatusCode()).to.equal(404)
               done()
             })
@@ -761,7 +840,7 @@ describe('Recipes controller', () => {
 
             res.on('end', () => {
               expect(recipeReplaceOneStub.callCount).to.equal(1)
-              expect(recipeReplaceOneStub).to.have.been.calledWith({ _id: 'testId' })
+              expect(recipeReplaceOneStub).to.have.been.calledWith({ _id: 'testId', userId: 'testUserId' })
               expect(res._getStatusCode()).to.equal(500)
               expect(res._getData()).to.equal('Error searching')
               done()

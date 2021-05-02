@@ -174,6 +174,28 @@ module.exports = {
   },
 
   /**
+   * Delete a list using the list model
+   * @param req {request object}
+   * @param res {response object}
+   */
+  deleteList (req, res) {
+    if (!req.userId) {
+      return res.sendStatus(401) // Not authorized
+    }
+    if (req.params.id) {
+      return List.deleteOne({ _id: req.params.id, userId: req.userId })
+        .then((dbList) => {
+          return res.sendStatus(204)
+        })
+        .catch((error) => {
+          return res.status(500).send(error.message) // TODO: change for custom error message
+        })
+    } else {
+      res.status(400).send('missing list ID')
+    }
+  },
+
+  /**
    * Get all lists
    * @param req {request object}
    * @param res {response object}
@@ -216,7 +238,7 @@ module.exports = {
       return res.sendStatus(401) // Not authorized
     }
     if (req.params.id && req.params.recipeId) {
-      List.update({ _id: req.params.id, userId: req.userId }, { $pull: { items: { recipeId: { $in: [req.params.recipeId] } } } })
+      List.update({ _id: req.params.id, userId: req.userId }, { $pull: { items: { recipeId: req.params.recipeId } } })
         .then((dbList) => {
           return res.sendStatus(204)
         })
@@ -268,6 +290,28 @@ module.exports = {
         })
     } else {
       res.status(400).send('missing list ID or recipe ID')
+    }
+  },
+
+  /**
+   * Delete one item from list
+   * @param req {request object}
+   * @param res {response object}
+   */
+  deleteItemFromList (req, res) {
+    if (!req.userId) {
+      return res.sendStatus(401) // Not authorized
+    }
+    if (req.params.id && req.params.itemId) {
+      List.update({ _id: req.params.id, userId: req.userId }, { $pull: { items: { _id: req.params.itemId } } })
+        .then(() => {
+          return res.sendStatus(204)
+        })
+        .catch((error) => {
+          return res.status(500).send(error.message) // TODO: change for custom error message
+        })
+    } else {
+      return res.status(400).send('missing list ID or item ID')
     }
   }
 }

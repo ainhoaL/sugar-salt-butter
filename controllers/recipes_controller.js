@@ -26,6 +26,28 @@ module.exports = {
   },
 
   /**
+   * Delete a recipe using the recipe model
+   * @param req {request object}
+   * @param res {response object}
+   */
+  deleteRecipe (req, res) {
+    if (!req.userId) {
+      return res.sendStatus(401) // Not authorized
+    }
+    if (req.params.id) {
+      return Recipe.deleteOne({ _id: req.params.id, userId: req.userId })
+        .then(() => {
+          res.sendStatus(204)
+        })
+        .catch((error) => {
+          return res.status(500).send(error.message) // TODO: change for custom error message
+        })
+    } else {
+      res.status(400).send('missing recipe ID')
+    }
+  },
+
+  /**
    * Get an array of recipes
    * accepts query parameters:
    * - recipe property (title, url, ...) value: performs search by property specified (title=cake)
@@ -133,7 +155,7 @@ module.exports = {
       return res.sendStatus(401) // Not authorized
     }
     if (req.params.id) {
-      return Recipe.findOne({ _id: req.params.id })
+      return Recipe.findOne({ _id: req.params.id, userId: req.userId })
         .then(dbRecipe => {
           if (dbRecipe) {
             res.send(dbRecipe)
@@ -163,7 +185,7 @@ module.exports = {
       recipe = module.exports.processRecipe(recipe)
       recipe.userId = req.userId
 
-      return Recipe.replaceOne({ _id: req.params.id }, recipe)
+      return Recipe.replaceOne({ _id: req.params.id, userId: req.userId }, recipe)
         .then(dbRecipe => {
           if (dbRecipe) {
             return res.sendStatus(204)

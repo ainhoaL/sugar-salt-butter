@@ -21,7 +21,7 @@ module.exports = {
       // TODO: for now assuming that the request is in the same format as the recipe model
       return Recipe.create(recipe).then(dbRecipe => res.send(dbRecipe))
     } else {
-      return res.send({}) // TODO: error?
+      return res.sendStatus(400)
     }
   },
 
@@ -330,7 +330,7 @@ module.exports = {
     let ingredientClasses
     recipe.ingredients.forEach((ingredient) => {
       ingredientClasses = ingredientsClassifier.getClassifications(ingredient.name)
-      if (ingredientClasses[0].value >= 1.9 * ingredientClasses[1].value) { // TODO: DOES 'Tablespoon' unit not work anymore in parsing???
+      if (ingredientClasses[0].value >= 1.9 * ingredientClasses[1].value) {
         ingredient.ingredientMatch = ingredientClasses[0].label
       }
     })

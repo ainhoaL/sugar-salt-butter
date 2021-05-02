@@ -43,8 +43,7 @@ describe('Recipes controller', () => {
 
           res.on('end', () => {
             expect(recipeCreateStub.callCount).to.equal(0)
-            expect(res._getStatusCode()).to.equal(200)
-            expect(res._getData()).to.deep.equal({})
+            expect(res._getStatusCode()).to.equal(400)
             done()
           })
 

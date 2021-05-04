@@ -50,7 +50,7 @@ Code:
 Documentation: [Swagger doc](https://github.com/ainhoaL/sugar-salt-butter/blob/master/docs/swagger.yaml)
 
 ### Auth
-Authentication is done via Google Oauth using [`google-auth-library`](https://www.npmjs.com/package/google-auth-library).
+Authentication is done via Google Oauth with [`google-auth-library`](https://www.npmjs.com/package/google-auth-library), using Bearer token authentication.
 Users don't need to register with the app to log in, instead they log in via Google. Every recipe and list in the database is linked to a user via the Google user ID. This way we are avoiding storing any passwords or confidential data.
 
 All requests to this app must have `Bearer <token>` set in the Authorization header. Every request will be authenticated with the GoogleAuth Client.

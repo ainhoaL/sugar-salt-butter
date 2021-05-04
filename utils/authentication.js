@@ -1,6 +1,6 @@
 const { OAuth2Client } = require('google-auth-library')
-const CLIENT_ID = 'CLIENT_ID'
-const WEBCLIENT_ID = 'WEBCLIENT_ID'
+const CLIENT_ID = process.env.CLIENT_ID
+const WEBCLIENT_ID = process.env.WEBCLIENT_ID
 
 module.exports = {
   verify (req, res, next) {
@@ -9,7 +9,7 @@ module.exports = {
       if (token) {
         return module.exports.internal.verifyToken(token)
           .catch(() => {
-            // We probably got a auth token instead of id token, try and get the user id in a different way
+            // We probably got an auth token instead of id token, try and get the user id in a different way
             return module.exports.internal.getUserIdFromTokenInfo(token)
           })
           .then((userId) => {

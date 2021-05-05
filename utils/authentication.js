@@ -47,7 +47,7 @@ module.exports.internal = {
       idToken: token,
       audience: WEBCLIENT_ID
     })
-    const payload = ticket.getPayload(CLIENT_ID)
+    const payload = ticket.getPayload(WEBCLIENT_ID)
     const userId = payload.sub
     return Promise.resolve(userId)
   },
